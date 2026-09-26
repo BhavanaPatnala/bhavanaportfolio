@@ -8,7 +8,7 @@ import { certifications } from '@/data/certifications';
 const STATUS_LABEL = { live: 'Live', 'in-development': 'In development', documenting: 'Documenting' } as const;
 
 const positions = themes.filter((t) => t.id === 'ai-engineering' || t.id === 'human-centered-ai');
-const labSlugs = ['perf-os', 'ai-violation-detection', 'ai-debate-system'] as const;
+const labSlugs = ['perf-os', 'ai-violation-detection', 'aveniq'] as const;
 const mlCert = certifications.find((c) => c.id === 'supervised-ml');
 
 /**

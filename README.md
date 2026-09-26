@@ -3,8 +3,11 @@
 The immersive 3D counterpart to the editorial site at `D:\Portfolio`. Built
 in stages per the brief's own plan. **Every link in the top nav and footer
 now resolves** — Work, Experience, AI Lab, Recognition, About, Contact and
-Resume — plus the project index and all four case studies. Still to come:
+Resume — plus the project index and all three case studies. Still to come:
 a dedicated technology-ecosystem section and a GitHub build log.
+
+Source at **https://github.com/BhavanaPatnala/bhavanaportfolio**; Vercel
+deployment in progress.
 
 ```bash
 npm install
@@ -50,10 +53,10 @@ build while `npm run dev` is also running.
   feeding a central one, a pulse travelling each edge) standing in for the
   section's actual claim — deterministic code decides, the model explains.
   Grounded entirely in verified material: the two AI-relevant editorial
-  positions from `data/thinking.ts`, the three AI-adjacent projects
-  (PerfOS's Claude SDK analysis layer, AI Violation Detection, AI Debate
-  System), and a footnote citing the Coursera/DeepLearning.AI/Stanford
-  Online "Supervised Machine Learning" certification with its verify link.
+  positions from `data/thinking.ts`, all three real projects (PerfOS's
+  Claude SDK analysis layer, CiviqueX, Aveniq), and a footnote citing the
+  Coursera/DeepLearning.AI/Stanford Online "Supervised Machine Learning"
+  certification with its verify link.
 - **Recognition — "Beyond the code"** — a sixth environment, and the
   emptiest on the site on purpose: a sparse drifting particle field with a
   handful of larger markers, behind three archives — jury/evaluator
@@ -79,11 +82,13 @@ moment — hides the fixed nav and footer, drops the dark palette to black
 text on white, and marks each `.print-break` block to avoid splitting
 across a page boundary.
 
-**Four case studies** at `/work/<slug>`, all reusing the exact
-fact-checked content and verified product screenshots already produced for
-the companion site (PerfOS, Aveniq) or its honest documenting-in-progress
-scaffolds (AI Violation Detection, AI Debate System) — nothing here was
-re-derived from memory or re-fabricated.
+**Three case studies** at `/work/<slug>` — PerfOS, CiviqueX and Aveniq —
+each built from real, verified product screenshots (nine per case study
+for PerfOS and CiviqueX, five for Aveniq), with the genuinely-undocumented
+parts (system architecture, model training, datasets) left as an honest
+`ScaffoldSections` slot naming exactly what belongs there, rather than a
+guess. A fourth project, "AI Debate System," was removed entirely this
+round — it turned out to be the same project as Aveniq, not a separate one.
 
 ## Two scroll-driven sections, one shared mechanic
 
@@ -153,7 +158,12 @@ corrected `year` from `null` to `'2025'` for Smart India Hackathon (the
 certificate itself says "SIH 2025") and filled in `host: 'SRM Easwari
 Engineering College'` for two other events where it had been left
 unconfirmed (visible on the ID badges in the photos). An event still
-awaiting photography keeps its honest empty plate.
+awaiting photography keeps its honest empty plate. `roles` for the four
+events that still showed "Role to be confirmed" (India AI Impact Summit,
+Hack to the Future, Code Clash — Prep2Placements, Talent Hunt — Tarang)
+are now Evaluator/Jury, and Students Industry Outreach gained Mentor
+alongside its existing Evaluator — both confirmed directly by their owner,
+not inferred from the photos.
 
 ## The evidence carousel
 
@@ -166,6 +176,24 @@ whichever photo the carousel was actually showing — not always frame one.
 It reuses `lib/useInView.ts` (the same hook gating the 3D scenes' render
 loops, see below) so an off-screen card's timer stops entirely rather than
 ticking uselessly in the background.
+
+## CiviqueX — a case study built from a live product, not a placeholder
+
+The "AI Violation Detection" project used to be an honest scaffold with no
+material to show. It now has nine real screenshots from the deployed demo
+(`https://civiquex-flax.vercel.app/`) and a case study written from
+actually reading them — including opening the login screen to confirm the
+four demo roles (Citizen, two Authority roles, Admin), and reading the
+technical footnote on an incident's "why this result" panel to get the
+exact model names right: `coco-ssd@2.2.3 (lite_mobilenet_v2)` for
+detection, `civiquex-iou-tracker@1` for tracking, `tesseract.js@6` for
+plate OCR. The site's own honesty about uncertainty is the throughline of
+the "Decisions" section — a plate reading that disagrees across frames
+ships as "vehicle number could not be reliably determined," not a
+best-guess plate number, and every flag cites the specific rule it matched
+rather than asserting a verdict. `PipelineDiagram`, previously hardcoded
+to PerfOS's own seven stages, now takes a `stages` prop so both case
+studies share the one component instead of two near-identical copies.
 
 ## Dev and QA never share a build
 
@@ -190,7 +218,7 @@ served a correct page afterward, then reproduced the original bug's exact
 repro (click the Aveniq card from the home page, a real client-side
 navigation) against the dev server and got zero failed requests.
 
-## Four bugs fixed at their source, not at each call site
+## Five bugs fixed at their source, not at each call site
 
 `bone-4` (`#6E695D`) was designed as a "large/decorative only" faint tone
 and then used for small mono labels in 20+ places across the site anyway —
@@ -211,32 +239,45 @@ each of the nine call sites.
 
 And the dev/QA build collision above — a fourth, structural one.
 
+The fifth showed up only on the CiviqueX case study, at mobile width: a
+consistent 58px of horizontal overflow, present the instant the page
+loaded and unrelated to scroll position. The cause was the CSS grid/flex
+default of `min-width: auto` on a flex or grid child — it refuses to
+shrink below its content's own minimum width unless told otherwise. Two
+places in `ScreenshotFrame`/`PipelineDiagram` (both shared by every case
+study) hit it for the first time here because CiviqueX's captions contain
+long technical tokens with no space to break on (`lite_mobilenet_v2`,
+`civiquex-iou-tracker@1`) — PerfOS and Aveniq's copy happened to never
+trigger it. Fixed with `min-w-0` on the flex/grid children plus
+`break-words` on the caption text, which benefits all three case studies,
+not just the one that first exposed it. Found by bisection — hiding each
+`CaseSection` in turn and rechecking `scrollWidth` — after the more
+obvious "long single string" theory (the URL chrome bar, which does use
+`truncate`) turned out to already be fixed and not the actual cause.
+
 ## Verified this round
 
-0 accessibility violations (axe-core, WCAG 2A/2AA) across all 6 routes
+0 accessibility violations (axe-core, WCAG 2A/2AA) across all 5 routes
 (`/`, `/resume`, `/work/perf-os`, `/work/aveniq`,
-`/work/ai-violation-detection`, `/work/ai-debate-system`), 26/26
-interaction checks (preloader, keyboard, nav condensing, mobile menu,
-reduced motion, link integrity, a live fetch confirming all 4 case-study
-routes and `/resume` resolve 200, all six top-nav anchors resolving to a
-real section, and — new this round — an evidence carousel confirmed to
-autoplay under normal motion, stay frozen on frame one under reduced
-motion, and jump correctly on a manual dot click), no horizontal overflow
-at 390px on the full home page or on `/resume`, the `@media print`
+`/work/ai-violation-detection`), 25/25 interaction checks (preloader,
+keyboard, nav condensing, mobile menu, reduced motion, link integrity, a
+live fetch confirming all 3 case-study routes and `/resume` resolve 200,
+all six top-nav anchors resolving to a real section, and an evidence
+carousel confirmed to autoplay under normal motion, stay frozen on frame
+one under reduced motion, and jump correctly on a manual dot click), no
+horizontal overflow at 390px on the full home page, `/resume`, or — after
+this round's fix — any of the three case studies, the `@media print`
 stylesheet verified by computed style (not just a screenshot, which under
 headless print-media emulation is a known unreliable proxy), Lighthouse
 accessibility 100 / CLS ~0 everywhere, performance consistent with this
 machine's established load variance.
 
-This round's changes (the dev/QA build fix, and naming Triad Software
-Private Limited and Clariti specifics in the Engineer and Journey
-sections) kept that same 0/26/0 result — plus a direct reproduction of the
+This round's changes (removing AI Debate System, rebuilding CiviqueX from
+real screenshots, correcting event roles, the mobile-overflow fix) kept
+that same 0/0 accessibility result — plus a direct reproduction of the
 Aveniq navigation bug against the dev server (0 failed requests after the
-fix, versus the original screenshot showing six), and the Journey role
-card checked at all four career stages across three viewport heights
-(including the longest-text role, 2015 Software Engineer, at a
-short 1440×700 viewport) to confirm the two new work bullets never push
-the timeline out of the pinned section.
+earlier fix), and the mobile-overflow bisection confirmed clean on all
+three case studies individually, not just the one that first surfaced it.
 
 Two testing caveats worth keeping in mind before trusting any QA run here,
 both found and fixed this round:

@@ -11,7 +11,7 @@ import fs from 'node:fs';
 const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const BASE = process.env.BASE || 'http://localhost:3100';
 const axe = fs.readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
-const routes = ['/', '/resume', '/work/perf-os', '/work/aveniq', '/work/ai-violation-detection', '/work/ai-debate-system'];
+const routes = ['/', '/resume', '/work/perf-os', '/work/aveniq', '/work/ai-violation-detection'];
 
 const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox', '--use-gl=swiftshader'] });
 let total = 0;

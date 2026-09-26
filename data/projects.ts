@@ -50,42 +50,28 @@ export const projects: Project[] = [
   {
     slug: 'ai-violation-detection',
     index: '02',
-    title: 'AI Violation Detection',
-    kicker: 'Computer vision / inference system',
-    discipline: 'Applied AI',
+    title: 'CiviqueX',
+    kicker: 'Road Safety Evidence & Accountability Platform',
+    discipline: 'Applied AI / computer vision',
     year: '2026',
     role: 'Design and engineering',
-    status: 'documenting',
+    status: 'live',
     summary:
-      'A detection system that reads video frames and flags violations with a confidence signal attached to every call.',
+      'A citizen records a road-safety issue on video; CiviqueX verifies the evidence frame by frame and routes a confirmed report to the right traffic authority.',
     standfirst:
-      'A computer-vision system built to watch a stream and decide, frame by frame, whether something has gone wrong, and to be honest about how sure it is.',
-    stack: ['Computer vision', 'AI inference'],
-    links: [],
-    facts: [],
-    documented: false,
-  },
-  {
-    slug: 'ai-debate-system',
-    index: '03',
-    title: 'AI Debate System',
-    kicker: 'Reasoning / multi-agent argumentation',
-    discipline: 'AI research experiment',
-    year: '2026',
-    role: 'Design and engineering',
-    status: 'documenting',
-    summary:
-      'A system where argument and counter-argument are generated, evidenced and then judged. Reasoning made inspectable.',
-    standfirst:
-      'Most AI answers arrive as a single confident block of text. This experiment breaks the answer apart: a position, an opposing position, the evidence each one leans on, and an evaluation pass that decides which held up.',
-    stack: ['AI reasoning', 'Multi-agent flow'],
-    links: [],
-    facts: [],
-    documented: false,
+      'CiviqueX turns a citizen’s phone video into evidence a traffic authority can act on — detecting the vehicle, tracking it across frames, reading the plate, and reporting exactly how confident it is rather than asserting a guess.',
+    stack: ['Computer vision', 'TensorFlow.js (coco-ssd)', 'Tesseract.js OCR', 'Object tracking'],
+    links: [{ label: 'Live demo', href: 'https://civiquex-flax.vercel.app/', external: true }],
+    facts: [
+      { value: '10', label: 'Violation categories' },
+      { value: '4', label: 'Account roles' },
+      { value: '3', label: 'Chained detection models' },
+    ],
+    documented: true,
   },
   {
     slug: 'aveniq',
-    index: '04',
+    index: '03',
     title: 'Aveniq',
     kicker: 'AI shopping research assistant',
     discipline: 'Applied AI / product',
@@ -273,8 +259,145 @@ export const perfOs = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Aveniq case study                                                    */
+/* CiviqueX case study                                                  */
 /* ------------------------------------------------------------------ */
+
+export const civiquex = {
+  problem: {
+    title: 'A complaint is not evidence',
+    body: [
+      'A citizen sees an illegally parked car blocking a bus stop, a footpath obstruction, or a damaged traffic signal — and has no reliable way to make that report land with the right authority as something they can actually act on, rather than one more unverifiable complaint in a queue.',
+      'CiviqueX starts at the capture: a citizen uploads a photo or a short recording, and the platform identifies the incident, verifies the evidence frame by frame, and routes the report to the correct traffic authority automatically — with a confidence score attached to every step, not just a final yes or no.',
+    ],
+  },
+  /**
+   * The interface, screen by screen. Every caption describes only what the
+   * product actually shows in the supplied screenshots — the demo accounts,
+   * the specific incident (Bus Stop Obstruction, Chowdhary Nagar Main Road),
+   * and its evidence numbers are the walkthrough's own, not a claimed
+   * platform-wide accuracy rate.
+   */
+  interface: [
+    {
+      id: 'login',
+      file: 'login.png',
+      label: 'Sign in, by role',
+      caption:
+        'Four demo roles show the shape of the system before you touch it — Citizen, Authority (zone-based), Authority (Traffic Police) and Admin — each landing somewhere different after sign-in.',
+      url: 'civiquex-flax.vercel.app/login',
+    },
+    {
+      id: 'dashboard',
+      file: 'dashboard.png',
+      label: 'Capture. We verify. Civic good.',
+      caption:
+        'The citizen’s home screen: upload a photo or a short recording, and CiviqueX identifies the incident, verifies the evidence and routes it to the right traffic authority automatically — with a running tally of the visitor’s own submissions underneath.',
+      url: 'civiquex-flax.vercel.app',
+    },
+    {
+      id: 'category',
+      file: 'category-select.png',
+      label: 'Ten categories, one first question',
+      caption:
+        'Reporting starts with what was observed, not a blank text box — from illegal parking and footpath obstruction to a damaged traffic signal or a pothole. The rule engine decides what applies once the evidence is in.',
+      url: 'civiquex-flax.vercel.app/report',
+    },
+    {
+      id: 'capture',
+      file: 'capture-video.png',
+      label: '5–10 seconds is enough',
+      caption: 'A short video capture — or a file chosen from the device — is all the pipeline needs to work with.',
+      url: 'civiquex-flax.vercel.app/report?mode=video',
+    },
+    {
+      id: 'conflicting',
+      file: 'conflicting-readings.png',
+      label: 'Told when the evidence disagrees with itself',
+      caption:
+        'Seven usable plate readings across the tracked vehicle, five-for-five character agreement within each one — and still reported as unresolved, because the readings did not agree on plate length or on belonging to a single vehicle. The honest output is “vehicle number could not be reliably determined,” not a best guess.',
+      url: 'civiquex-flax.vercel.app/report',
+    },
+    {
+      id: 'evidence',
+      file: 'evidence-review.png',
+      label: 'A score, not a verdict',
+      caption: 'Every submission gets an evidence score out of 100 and a state — here, Review required at 59.9 — before it ever reaches an authority’s queue.',
+      url: 'civiquex-flax.vercel.app/report',
+    },
+    {
+      id: 'detail',
+      file: 'incident-detail.png',
+      label: 'The full record, one page',
+      caption:
+        'Location, time, vehicle and evidence state together, with a Verify again option — the same record the reporting citizen and the reviewing authority both see.',
+      url: 'civiquex-flax.vercel.app/incidents/[id]',
+    },
+    {
+      id: 'proof',
+      file: 'incident-proof.png',
+      label: 'Every object the model saw',
+      caption:
+        'The supporting recording, tagged frame by frame — car, traffic light, person — with unrelated faces and plates automatically blurred before anything leaves the platform, and the exact rule the incident was checked against, cited by number.',
+      url: 'civiquex-flax.vercel.app/incidents/[id]',
+    },
+    {
+      id: 'repository',
+      file: 'incidents-repository.png',
+      label: 'Recurring incidents, correlated',
+      caption:
+        'The officer’s queue: six incidents in a correlated graph, three of them flagged recurring at the same GN Chetty Road location within the same evening — a hotspot the system surfaces on its own rather than one an officer has to notice by hand.',
+      url: 'civiquex-flax.vercel.app/incidents',
+    },
+  ],
+  categories: [
+    'Wrong / illegal parking',
+    'Footpath obstruction',
+    'Bus-stop obstruction',
+    'Emergency-access obstruction',
+    'School-zone obstruction',
+    'Accessible-parking obstruction',
+    'Traffic-sign / signal obstruction or damage',
+    'Dangerous road obstruction',
+    'Potentially hazardous traffic interaction',
+    'Pothole / road surface damage',
+  ],
+  pipeline: [
+    { id: 'capture', label: 'Capture', note: 'A citizen records 5–10 seconds of video, or uploads a photo, against one of ten observed categories' },
+    { id: 'detect', label: 'Object detection', note: 'coco-ssd@2.2.3 (lite_mobilenet_v2) scans frames for vehicles, signage and people' },
+    { id: 'track', label: 'Tracking', note: 'civiquex-iou-tracker@1 follows a vehicle across frames rather than reading each one in isolation' },
+    { id: 'ocr', label: 'Plate OCR', note: 'tesseract.js@6 (English, plate charset) reads the plate from every usable frame in the track' },
+    { id: 'score', label: 'Evidence scoring', note: 'Frames too small to carry real characters are excluded; agreement across readings produces a 0–100 evidence score and a cited best-evidence frame' },
+    { id: 'rule', label: 'Rule match', note: 'The observed context is matched against a specific numbered rule and framed as a potential, not confirmed, violation' },
+    { id: 'route', label: 'Routing & review', note: 'The report lands in the correct authority’s queue, triaged by evidence strength alongside any other reports correlated to the same location' },
+  ],
+  decisions: [
+    {
+      n: '01',
+      title: 'Confidence is a number, not a claim',
+      body: 'Every submission carries an evidence score out of 100 and an explicit state — Strong evidence, Review required, Resolved — instead of a binary confirmed/denied. A 59.9 is shown as a 59.9, not rounded up into false certainty.',
+    },
+    {
+      n: '02',
+      title: 'A conflicting reading is reported, not hidden',
+      body: 'When plate OCR disagrees across frames — different plate lengths, characters that are not plausibly the same glyph — CiviqueX says so directly: “plate-to-vehicle association NOT established,” rather than silently picking the most common reading and asserting it.',
+    },
+    {
+      n: '03',
+      title: 'Every flag cites a rule, by number',
+      body: 'A finding names the exact rule it matched (for example GCC-BS-01) and states plainly that this is a potential violation, not a confirmed one — final determination is left to the authority whose rule it is.',
+    },
+    {
+      n: '04',
+      title: 'Recurring incidents are correlated, not siloed',
+      body: 'The incidents repository groups reports at the same location within the same window into a recurring cluster inside a correlated incident graph, so a hotspot is visible to the reviewing officer without anyone having to notice it by hand.',
+    },
+    {
+      n: '05',
+      title: 'Privacy is handled before anyone outside the loop sees it',
+      body: 'Unrelated faces and plates in a submitted recording are automatically blurred before it is shown outside the reviewing authority — a default, not an option to remember to turn on.',
+    },
+  ],
+};
 
 export const aveniq = {
   problem: {
@@ -378,29 +501,14 @@ export type ScaffoldSection = {
   awaiting?: string;
 };
 
-export const violationDetection: ScaffoldSection[] = [
-  { id: 'problem', n: '01', title: 'Problem', body: null, awaiting: 'Problem statement and the conditions the system was built to catch' },
-  { id: 'concept', n: '02', title: 'Concept', body: null, awaiting: 'System concept and scope' },
-  { id: 'architecture', n: '03', title: 'System architecture', body: null, awaiting: 'Services, data flow and deployment shape' },
-  { id: 'model', n: '04', title: 'Model', body: null, awaiting: 'Model family and training or fine-tuning approach' },
-  { id: 'vision', n: '05', title: 'Computer-vision pipeline', body: null, awaiting: 'Frame capture, pre-processing, inference and post-processing stages' },
-  { id: 'data', n: '06', title: 'Datasets', body: null, awaiting: 'Dataset sources, size and labelling method' },
-  { id: 'logic', n: '07', title: 'Detection logic', body: null, awaiting: 'Rules, thresholds and confidence handling' },
-  { id: 'results', n: '08', title: 'Results', body: null, awaiting: 'Measured accuracy and evaluation method' },
+/** The product, its categories, pipeline and design decisions are
+ *  documented above from the supplied screenshots; the implementation
+ *  underneath it is not, so this stays a scaffold rather than a guess. */
+export const civiquexTechnical: ScaffoldSection[] = [
+  { id: 'architecture', n: '06', title: 'System architecture', body: null, awaiting: 'Services, data flow and deployment shape' },
+  { id: 'model', n: '07', title: 'Model and training', body: null, awaiting: 'How the detection and tracking models were selected, tuned or fine-tuned' },
+  { id: 'dataset', n: '08', title: 'Datasets', body: null, awaiting: 'Dataset sources, size and labelling method' },
   { id: 'challenges', n: '09', title: 'Technical challenges', body: null, awaiting: 'The hard parts, and how they were resolved' },
-  { id: 'future', n: '10', title: 'Future improvements', body: null, awaiting: 'Planned direction' },
-];
-
-export const debateSystem: ScaffoldSection[] = [
-  { id: 'problem', n: '01', title: 'Problem', body: null, awaiting: 'The reasoning problem this system addresses' },
-  { id: 'concept', n: '02', title: 'Concept', body: null, awaiting: 'How the debate is framed, and what a round consists of' },
-  { id: 'architecture', n: '03', title: 'System architecture', body: null, awaiting: 'Services, orchestration and state' },
-  { id: 'flow', n: '04', title: 'Debate flow', body: null, awaiting: 'Turn structure and termination conditions' },
-  { id: 'argument', n: '05', title: 'Argument generation', body: null, awaiting: 'How a position is constructed' },
-  { id: 'counter', n: '06', title: 'Counter-argument', body: null, awaiting: 'How the opposing position is derived' },
-  { id: 'evidence', n: '07', title: 'Evidence and reasoning', body: null, awaiting: 'Sourcing, citation and the reasoning trace' },
-  { id: 'evaluation', n: '08', title: 'Evaluation', body: null, awaiting: 'Judging criteria and scoring' },
-  { id: 'output', n: '09', title: 'Final output', body: null, awaiting: 'What the system returns, and how it is presented' },
 ];
 
 /** The product and its interface are documented above; the implementation

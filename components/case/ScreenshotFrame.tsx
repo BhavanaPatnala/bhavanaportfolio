@@ -23,7 +23,7 @@ export default function ScreenshotFrame({ src, alt, label, caption, url, classNa
   const Wrapper = onOpen ? 'button' : 'div';
 
   return (
-    <figure className={cn('reveal', className)} style={style}>
+    <figure className={cn('reveal min-w-0', className)} style={style}>
       <Wrapper
         {...(onOpen
           ? { type: 'button', onClick: onOpen, 'data-cursor': 'explore', 'aria-label': `Open ${label} full size` }
@@ -33,13 +33,13 @@ export default function ScreenshotFrame({ src, alt, label, caption, url, classNa
           onOpen && 'cursor-pointer hover:border-glass-borderStrong hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.6)]',
         )}
       >
-        <div className="flex items-center gap-2 border-b border-glass-border bg-void px-4 py-2.5">
-          <span className="flex gap-1.5" aria-hidden>
+        <div className="flex min-w-0 items-center gap-2 border-b border-glass-border bg-void px-4 py-2.5">
+          <span className="flex shrink-0 gap-1.5" aria-hidden>
             <span className="h-2 w-2 rounded-full bg-bone/15" />
             <span className="h-2 w-2 rounded-full bg-bone/15" />
             <span className="h-2 w-2 rounded-full bg-bone/15" />
           </span>
-          {url && <span className="ml-2 truncate font-mono text-micro text-bone-4">{url}</span>}
+          {url && <span className="ml-2 min-w-0 truncate font-mono text-micro text-bone-4">{url}</span>}
         </div>
         <div className="relative aspect-[16/10] w-full bg-[#0A0908]">
           {src ? (
@@ -63,7 +63,7 @@ export default function ScreenshotFrame({ src, alt, label, caption, url, classNa
       </Wrapper>
       <figcaption className="mt-3">
         <p className="text-body text-bone">{label}</p>
-        <p className="mt-1 text-small text-bone-3">{caption}</p>
+        <p className="mt-1 break-words text-small text-bone-3">{caption}</p>
       </figcaption>
     </figure>
   );

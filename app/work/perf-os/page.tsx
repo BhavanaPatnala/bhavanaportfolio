@@ -82,7 +82,7 @@ export default function PerfOsCaseStudy() {
       </CaseSection>
 
       <CaseSection n="06" label="Pipeline" title="Detection, stage by stage" lede="Seven stages between a repository URL and something an engineer can act on.">
-        <PipelineDiagram />
+        <PipelineDiagram stages={perfOs.pipeline} />
       </CaseSection>
 
       <CaseSection

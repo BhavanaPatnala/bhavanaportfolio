@@ -1,36 +1,29 @@
 'use client';
 
-const STAGES = [
-  { id: 'repo', label: 'Repository', note: 'Frontend codebase as input' },
-  { id: 'scan', label: 'Scanner', note: 'Traverse sources, build the working set' },
-  { id: 'analysis', label: 'Analysis', note: 'Resolve modules, imports and reachability' },
-  { id: 'detect', label: 'Detection engine', note: 'Classify findings into six categories' },
-  { id: 'ai', label: 'AI analysis', note: 'Claude SDK explains and prioritises' },
-  { id: 'findings', label: 'Findings', note: 'Served over 23 REST endpoints' },
-  { id: 'action', label: 'Developer action', note: 'Angular 19 client, reviewable output' },
-];
+type Stage = { id: string; label: string; note: string };
 
 /** The audit pipeline, drawn as a travelling signal down a rail — the same
  *  visual idea as the hero's data points, applied to one project's own
- *  process rather than the site as a whole. */
-export default function PipelineDiagram() {
+ *  process rather than the site as a whole. Generic over `stages` so every
+ *  project's pipeline can reuse the same rail rather than a hardcoded copy. */
+export default function PipelineDiagram({ stages }: { stages: Stage[] }) {
   return (
     <ol className="relative mt-10">
       <div aria-hidden className="absolute bottom-6 left-[15px] top-6 w-px overflow-hidden bg-glass-border sm:left-[19px]">
         <span className="rail-signal absolute left-0 top-0 block h-16 w-px bg-gradient-to-b from-transparent via-signature to-transparent" />
       </div>
 
-      {STAGES.map((stage, i) => (
+      {stages.map((stage, i) => (
         <li key={stage.id} className="reveal relative flex gap-5 pb-7 last:pb-0 sm:gap-6" style={{ transitionDelay: `${i * 80}ms` }}>
           <span className="relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-glass-borderStrong bg-void font-mono text-micro text-bone-3 sm:h-10 sm:w-10">
             {String(i + 1).padStart(2, '0')}
           </span>
-          <div className="group flex-1 border-b border-glass-border pb-6">
+          <div className="group min-w-0 flex-1 border-b border-glass-border pb-6">
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
               <h3 className="text-h1 text-bone transition-colors duration-300 group-hover:text-signature">{stage.label}</h3>
-              <p className="label">Stage {i + 1} of {STAGES.length}</p>
+              <p className="label">Stage {i + 1} of {stages.length}</p>
             </div>
-            <p className="mt-2 max-w-prose text-small text-bone-2">{stage.note}</p>
+            <p className="mt-2 max-w-prose break-words text-small text-bone-2">{stage.note}</p>
           </div>
         </li>
       ))}

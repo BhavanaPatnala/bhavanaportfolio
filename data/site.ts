@@ -20,6 +20,7 @@ export const site = {
     clariti: 'https://clariti.app/',
     perfOsDemo: 'https://perf-os-six.vercel.app/',
     perfOsRepo: 'https://github.com/BhavanaPatnala/PerfOS',
+    civiquexDemo: 'https://civiquex-flax.vercel.app/',
   },
 } as const;
 

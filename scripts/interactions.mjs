@@ -1,6 +1,6 @@
 /**
  * Interaction smoke test: preloader, nav, hero, reduced motion, and link
- * integrity across the home page and all four case studies.
+ * integrity across the home page and all three case studies.
  *   npm run build:qa && npm run start:qa   (in one terminal — a separate
  *                                            .next-qa/ output, safe to run
  *                                            alongside `npm run dev`)
@@ -101,7 +101,7 @@ const external = hrefs.filter((h) => h.startsWith('http'));
 check('External links present', external.length >= 2, external.join(', '));
 
 const projectLinks = hrefs.filter((h) => h.startsWith('/work/'));
-check('Project cards link to all 4 case studies', projectLinks.length === 4, projectLinks.join(', '));
+check('Project cards link to all 3 case studies', projectLinks.length === 3, projectLinks.join(', '));
 for (const href of projectLinks) {
   const res = await fetch(BASE + href);
   check(`Case study resolves: ${href}`, res.ok, String(res.status));

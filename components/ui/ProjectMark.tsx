@@ -12,7 +12,6 @@ export default function ProjectMark({ slug, className }: { slug: string; classNa
     <svg viewBox="0 0 200 150" aria-hidden className={cn('h-full w-full', className)} preserveAspectRatio="xMidYMid meet">
       {slug === 'perf-os' && <PerfOsMark />}
       {slug === 'ai-violation-detection' && <ViolationMark />}
-      {slug === 'ai-debate-system' && <DebateMark />}
       {slug === 'aveniq' && <AveniqMark />}
     </svg>
   );
@@ -48,20 +47,6 @@ function ViolationMark() {
       ))}
       <rect x="72" y="46" width="56" height="56" stroke="#E07A4C" strokeWidth="1.25" fill="none" vectorEffect="non-scaling-stroke" />
       <rect x="72" y="38" width="30" height="10" fill="#E07A4C" />
-    </g>
-  );
-}
-
-/* Two facing structures, converging on a resolved centre */
-function DebateMark() {
-  return (
-    <g>
-      <rect x="20" y="50" width="46" height="14" {...stroke} opacity="0.5" />
-      <rect x="20" y="74" width="34" height="14" {...stroke} opacity="0.35" />
-      <rect x="134" y="58" width="46" height="14" {...stroke} strokeDasharray="3 3" opacity="0.5" />
-      <rect x="146" y="82" width="34" height="14" {...stroke} strokeDasharray="3 3" opacity="0.35" />
-      <path d="M66 57 L100 75 M180 65 L100 75" stroke="#E07A4C" strokeWidth="1" opacity="0.7" vectorEffect="non-scaling-stroke" />
-      <rect x="90" y="65" width="20" height="20" transform="rotate(45 100 75)" fill="none" stroke="#E07A4C" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
     </g>
   );
 }
