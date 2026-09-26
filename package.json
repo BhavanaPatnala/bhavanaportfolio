@@ -1,0 +1,40 @@
+{
+  "name": "bhavana-portfolio-3d",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "build:qa": "cross-env BUILD_TARGET=qa next build",
+    "start:qa": "cross-env BUILD_TARGET=qa next start -p 3100",
+    "qa:a11y": "node scripts/a11y.mjs",
+    "qa:interactions": "node scripts/interactions.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "framer-motion": "^13.4.0",
+    "gsap": "^3.15.0",
+    "next": "^15.5.25",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/three": "^0.186.0",
+    "autoprefixer": "^10.6.1",
+    "axe-core": "^4.13.0",
+    "cross-env": "^10.1.0",
+    "lighthouse": "^13.5.0",
+    "postcss": "^8.5.28",
+    "puppeteer-core": "^25.11.0",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3"
+  }
+}
