@@ -91,6 +91,40 @@ const stillOnFirstFrame = await p.evaluate(() =>
 check('Evidence carousels do not autoplay under reduced motion', stillOnFirstFrame);
 await p.close();
 
+// --- Mobile tier: a touch device must still get the 3D scenes. This is a
+// regression guard for a real bug — the tier heuristic used to treat any
+// touch device under 768px (i.e. nearly every phone in portrait) as
+// low-tier, which meant no canvas ever mounted on most phones at all. A
+// genuinely low-end device (very few cores, very little memory) should
+// still fall back to the static SVG, so both are checked. ---
+p = await b.newPage();
+await p.evaluateOnNewDocument((cores, mem) => {
+  Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => cores });
+  Object.defineProperty(navigator, 'deviceMemory', { get: () => mem });
+}, 6, 4);
+await p.emulate({
+  viewport: { width: 393, height: 851, deviceScaleFactor: 2.75, isMobile: true, hasTouch: true, isLandscape: false },
+  userAgent: 'Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+});
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2800));
+check('A mid-range phone (touch, 6 cores, 4GB) still gets the 3D scene', (await p.evaluate(() => document.querySelectorAll('canvas').length)) > 0);
+await p.close();
+
+p = await b.newPage();
+await p.evaluateOnNewDocument((cores, mem) => {
+  Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => cores });
+  Object.defineProperty(navigator, 'deviceMemory', { get: () => mem });
+}, 2, 1);
+await p.emulate({
+  viewport: { width: 393, height: 851, deviceScaleFactor: 2.75, isMobile: true, hasTouch: true, isLandscape: false },
+  userAgent: 'Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+});
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2800));
+check('A genuinely low-end phone (2 cores, 1GB) still falls back to the static SVG', (await p.evaluate(() => document.querySelectorAll('canvas').length)) === 0);
+await p.close();
+
 // --- Link integrity ---
 p = await b.newPage();
 await p.setViewport({ width: 1440, height: 900 });

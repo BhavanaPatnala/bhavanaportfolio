@@ -126,8 +126,27 @@ following content as a **sibling**, not a child.
   `lib/useDisposable.ts` on unmount or dependency change — R3F only
   auto-disposes what it creates directly from JSX children, not objects
   passed in as props.
-- `dpr` is capped by tier (2 / 1.5 / 1), never blindly matching the
+- `dpr` is capped by tier (2 / 1.25 / 1), never blindly matching the
   device's real pixel ratio.
+- **A real bug, found from a live report: most phones never got the 3D
+  scene at all, or got it noticeably slow.** `detectDeviceTier()` used to
+  route ANY touch device under 768px straight to `'low'` tier — which is
+  nearly every phone in portrait, since `'low'` is exactly the tier that
+  skips loading the WebGL chunk entirely. Touch input and a narrow
+  viewport were being treated as a proxy for "weak GPU," which they are
+  not — a modern phone held in portrait isn't a low-end device. The
+  heuristic now only routes to `'low'` for genuinely low-spec hardware
+  (`hardwareConcurrency <= 2 && deviceMemory <= 2`, or reduced motion);
+  every other touch device is capped at `'medium'` instead of excluded —
+  same scene, fewer particles, a tighter DPR ceiling, and (new) MSAA
+  antialiasing turned off and `powerPreference: 'low-power'` below `'high'`
+  tier, both real costs on mobile tile-based GPUs that plain desktop
+  testing never surfaces. Verified two ways: emulating a mid-range phone
+  (touch, 6 cores, 4GB) now shows all six canvases with `antialias: false`
+  in the actual WebGL context, and a genuinely low-end phone (2 cores,
+  1GB) still correctly renders zero canvases and gets the static SVG —
+  both are now permanent checks in `interactions.mjs`, not just a one-time
+  screenshot.
 - **Each scene's render loop is gated by `lib/useInView.ts`
   (`IntersectionObserver`), not just its mount.** Every 3D section stays
   mounted once ready — cheap, since context creation already happens once
@@ -218,7 +237,7 @@ served a correct page afterward, then reproduced the original bug's exact
 repro (click the Aveniq card from the home page, a real client-side
 navigation) against the dev server and got zero failed requests.
 
-## Five bugs fixed at their source, not at each call site
+## Six bugs fixed at their source, not at each call site
 
 `bone-4` (`#6E695D`) was designed as a "large/decorative only" faint tone
 and then used for small mono labels in 20+ places across the site anyway —
@@ -255,29 +274,43 @@ not just the one that first exposed it. Found by bisection — hiding each
 obvious "long single string" theory (the URL chrome bar, which does use
 `truncate`) turned out to already be fixed and not the actual cause.
 
+The sixth was the most consequential: most real phones never showed the 3D
+scene at all (see "Adaptive 3D" above for the full account) — a device-tier
+heuristic conflated touch input and a narrow viewport with weak hardware,
+which routed nearly every phone in portrait to the tier that skips loading
+the WebGL chunk entirely. Reported live, from an actual phone, not caught
+by any desktop-based test in this project up to that point.
+
 ## Verified this round
 
 0 accessibility violations (axe-core, WCAG 2A/2AA) across all 5 routes
 (`/`, `/resume`, `/work/perf-os`, `/work/aveniq`,
-`/work/ai-violation-detection`), 25/25 interaction checks (preloader,
+`/work/ai-violation-detection`), 27/27 interaction checks (preloader,
 keyboard, nav condensing, mobile menu, reduced motion, link integrity, a
 live fetch confirming all 3 case-study routes and `/resume` resolve 200,
-all six top-nav anchors resolving to a real section, and an evidence
-carousel confirmed to autoplay under normal motion, stay frozen on frame
-one under reduced motion, and jump correctly on a manual dot click), no
-horizontal overflow at 390px on the full home page, `/resume`, or — after
-this round's fix — any of the three case studies, the `@media print`
-stylesheet verified by computed style (not just a screenshot, which under
-headless print-media emulation is a known unreliable proxy), Lighthouse
-accessibility 100 / CLS ~0 everywhere, performance consistent with this
-machine's established load variance.
+all six top-nav anchors resolving to a real section, an evidence carousel
+confirmed to autoplay under normal motion and stay frozen under reduced
+motion, and — new this round — a simulated mid-range phone getting the 3D
+scene while a simulated low-end phone still correctly doesn't), no
+horizontal overflow at 390px on the full home page, `/resume`, or any of
+the three case studies, the `@media print` stylesheet verified by computed
+style (not just a screenshot, which under headless print-media emulation
+is a known unreliable proxy), Lighthouse accessibility 100 / CLS ~0
+everywhere, performance consistent with this machine's established load
+variance.
 
-This round's changes (removing AI Debate System, rebuilding CiviqueX from
-real screenshots, correcting event roles, the mobile-overflow fix) kept
-that same 0/0 accessibility result — plus a direct reproduction of the
-Aveniq navigation bug against the dev server (0 failed requests after the
-earlier fix), and the mobile-overflow bisection confirmed clean on all
-three case studies individually, not just the one that first surfaced it.
+This round's changes (the mobile device-tier fix, disabling antialiasing
+and lowering the DPR ceiling below `'high'` tier) kept that same 0/0
+accessibility result, verified two ways beyond the automated checks: a
+screenshot of the actual Hero scene rendering correctly on a simulated
+mid-range phone (previously it would have shown nothing at all), and
+`WebGLRenderingContext.getContextAttributes()` confirming `antialias:
+false` and `powerPreference: 'low-power'` are genuinely applied below
+`'high'` tier, not just requested. FPS under artificial 4x CPU throttling
+(a synthetic stress test, not a claim about any specific real device)
+averaged in the 40-50fps range with occasional dips — a large improvement
+over the prior state, which was zero rendering at all on most phones, not
+a slow one.
 
 Two testing caveats worth keeping in mind before trusting any QA run here,
 both found and fixed this round:
