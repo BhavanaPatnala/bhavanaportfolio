@@ -27,7 +27,7 @@ export default function Recognition() {
 
       <div className="shell">
         <p className="eyebrow reveal">
-          <span className="metric text-bone-4">04</span>
+          <span className="metric text-bone-4">03</span>
           <span aria-hidden className="h-px w-6 bg-current opacity-30" />
           <span>Recognition</span>
         </p>
@@ -87,6 +87,20 @@ export default function Recognition() {
           </div>
         </div>
       </div>
+
+      {/* The section number settles into place a beat after the eyebrow
+          reveals — scoped to this section's own numeral only, so moving
+          the section earlier in the page never touches how any other
+          section's eyebrow behaves. */}
+      <style>{`
+        #recognition p.eyebrow[data-shown='true'] .metric {
+          animation: recognition-numeral-in 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes recognition-numeral-in {
+          from { opacity: 0; transform: translateY(4px) scale(1.4); }
+          to { opacity: 1; transform: none; }
+        }
+      `}</style>
     </section>
   );
 }

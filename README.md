@@ -50,7 +50,17 @@ build while `npm run dev` is also running.
   depth on hover (perspective tilt tracking the pointer, a light highlight
   that moves with it) and its own abstract mark, linking to a full case
   study.
-- **AI Lab** — a fifth 3D vocabulary: a small signal graph (outer nodes
+- **Recognition — "Beyond the code"** — a fifth environment, and the
+  emptiest on the site on purpose: a sparse drifting particle field with a
+  handful of larger markers, behind three archives — jury/evaluator
+  evidence (`data/events.ts`, 36 real photos across 6 events, each in its
+  own `EventCarousel`; an event with no photography yet still renders a
+  labelled empty plate rather than a broken or invented image), competition
+  awards (`data/awards.ts`), and the certificates themselves as a floating
+  glass wall opening the original documents in a lightbox. Placed ahead of
+  AI Lab so the record of judging other people's work sits right after the
+  work itself, rather than after a section about the model.
+- **AI Lab** — a sixth 3D vocabulary: a small signal graph (outer nodes
   feeding a central one, a pulse travelling each edge) standing in for the
   section's actual claim — deterministic code decides, the model explains.
   Grounded entirely in verified material: the two AI-relevant editorial
@@ -58,14 +68,6 @@ build while `npm run dev` is also running.
   Claude SDK analysis layer, CiviqueX, Aveniq), and a footnote citing the
   Coursera/DeepLearning.AI/Stanford Online "Supervised Machine Learning"
   certification with its verify link.
-- **Recognition — "Beyond the code"** — a sixth environment, and the
-  emptiest on the site on purpose: a sparse drifting particle field with a
-  handful of larger markers, behind three archives — jury/evaluator
-  evidence (`data/events.ts`, 36 real photos across 6 events, each in its
-  own `EventCarousel`; an event with no photography yet still renders a
-  labelled empty plate rather than a broken or invented image), competition
-  awards (`data/awards.ts`), and the certificates themselves as a floating
-  glass wall opening the original documents in a lightbox.
 - **About** — the plainest section on the site, by design: after five 3D
   environments, the sixth thing the visitor needs is not another one. Three
   columns from `data/positioning.ts` (what I build / how I think / what I

@@ -32,7 +32,7 @@ export default function AiLab() {
 
       <div className="shell">
         <p className="eyebrow reveal">
-          <span className="metric text-bone-4">03</span>
+          <span className="metric text-bone-4">04</span>
           <span aria-hidden className="h-px w-6 bg-current opacity-30" />
           <span>AI Lab</span>
         </p>
@@ -119,6 +119,20 @@ export default function AiLab() {
           </p>
         )}
       </div>
+
+      {/* The section number settles into place a beat after the eyebrow
+          reveals — scoped to this section's own numeral only, so moving
+          the section later in the page never touches any other section's
+          eyebrow. */}
+      <style>{`
+        #ai-lab p.eyebrow[data-shown='true'] .metric {
+          animation: ai-lab-numeral-in 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes ai-lab-numeral-in {
+          from { opacity: 0; transform: translateY(4px) scale(1.4); }
+          to { opacity: 1; transform: none; }
+        }
+      `}</style>
     </section>
   );
 }
