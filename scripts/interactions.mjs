@@ -1,6 +1,6 @@
 /**
- * Interaction smoke test: preloader, nav, hero, reduced motion, and link
- * integrity across the home page and all three case studies.
+ * Interaction smoke test: preloader, nav, command palette, reduced motion,
+ * and link integrity across the home page and all three case studies.
  *   npm run build:qa && npm run start:qa   (in one terminal — a separate
  *                                            .next-qa/ output, safe to run
  *                                            alongside `npm run dev`)
@@ -63,6 +63,46 @@ await p.keyboard.press('Escape');
 await new Promise((r) => setTimeout(r, 400));
 check('Escape closes mobile menu', (await p.evaluate(() => document.getElementById('mobile-menu').getAttribute('aria-hidden'))) === 'true');
 check('Focus returns to toggle button', await p.evaluate(() => document.activeElement?.getAttribute('aria-controls') === 'mobile-menu'));
+await p.close();
+
+// --- Command palette: Ctrl+K opens it, typing narrows results, Escape
+// closes it and returns focus to the trigger, and selecting a result
+// actually navigates there (a real <Link>/<a>, not a custom router.push
+// that would skip Next's own same-page hash scrolling). ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2200));
+await p.keyboard.down('Control');
+await p.keyboard.press('k');
+await p.keyboard.up('Control');
+await new Promise((r) => setTimeout(r, 250));
+check('Ctrl+K opens the command palette', await p.evaluate(() => !!document.querySelector('[role="dialog"][aria-label="Command palette"]')));
+check('Command palette input is focused on open', await p.evaluate(() => document.activeElement?.tagName === 'INPUT'));
+
+await p.keyboard.type('civiquex');
+await new Promise((r) => setTimeout(r, 200));
+const paletteLabels = await p.evaluate(() => [...document.querySelectorAll('[role="dialog"] ul a, [role="dialog"] ul button')].map((el) => el.textContent ?? ''));
+check(
+  'Filtering the command palette narrows results',
+  paletteLabels.length > 0 && paletteLabels.every((l) => l.toLowerCase().includes('civiquex')),
+  paletteLabels.join(', '),
+);
+
+await p.keyboard.press('Escape');
+await new Promise((r) => setTimeout(r, 300));
+check('Escape closes the command palette', await p.evaluate(() => !document.querySelector('[role="dialog"][aria-label="Command palette"]')));
+check('Focus returns to the search trigger after closing', await p.evaluate(() => !!document.activeElement?.textContent?.includes('Search')));
+
+await p.keyboard.down('Control');
+await p.keyboard.press('k');
+await p.keyboard.up('Control');
+await new Promise((r) => setTimeout(r, 250));
+await p.keyboard.type('perfos');
+await new Promise((r) => setTimeout(r, 200));
+await p.evaluate(() => document.querySelector('[role="dialog"] ul a')?.click());
+await new Promise((r) => setTimeout(r, 600));
+check('Selecting a case study from the command palette navigates there', p.url().includes('/work/perf-os'), p.url());
 await p.close();
 
 // --- Reduced motion: no WebGL chunk requested, no canvas, content visible ---

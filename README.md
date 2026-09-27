@@ -353,3 +353,28 @@ both found and fixed this round:
   scrolled into view, so an autoplay check failed for a reason that had
   nothing to do with autoplay. Every page in the suite now sets an
   explicit viewport.
+
+## Command palette (Ctrl/Cmd+K)
+
+The first piece of a staged pass at making the site feel more like an
+engineering instrument and less like a brochure — reachable from anywhere on
+the site, no mouse required: every nav section, all three case studies, and
+the external links (GitHub, LinkedIn, Clariti, the two live demos), filtered
+by typing.
+
+Deliberately built to reuse what's already proven rather than invent new
+navigation logic: list items are real `<Link>`/`<a>` elements, the same
+mobile-menu pattern already shipped in `SiteNav`, not an ARIA
+combobox/listbox with synthetic `router.push` activation. That matters
+concretely here — Next's same-page hash scrolling (`/#recognition` etc.) is
+built into `<Link>`'s click handling, not into the imperative router API, so
+reimplementing activation by hand would have quietly broken jumping to a
+section from a case-study page. Keyboard highlighting moves real DOM focus
+between items (arrow keys), so the existing global `:focus-visible` ring and
+Escape/Enter/click behaviour all come for free instead of being rebuilt.
+
+Verified with 6 new permanent regression checks in `interactions.mjs`
+(open via Ctrl+K, input auto-focuses, typing narrows results to only
+matching entries, Escape closes and returns focus to the trigger, and
+selecting a result actually navigates) — 33/33 total, plus a fresh 0/5
+accessibility pass and a build/typecheck pass, before anything shipped.

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { nav, site } from '@/data/site';
 import { cn } from '@/lib/cn';
 import Mark from '@/components/ui/Mark';
+import CommandPalette from '@/components/ui/CommandPalette';
 
 /**
  * Floating navigation. Transparent over the hero, picks up a glass surface
@@ -93,6 +94,7 @@ export default function SiteNav() {
           </ul>
 
           <div className="flex items-center gap-4">
+            <CommandPalette />
             <Link
               href="/resume"
               data-cursor="link"
