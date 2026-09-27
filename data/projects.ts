@@ -365,7 +365,7 @@ export const civiquex = {
     { id: 'capture', label: 'Capture', note: 'A citizen records 5–10 seconds of video, or uploads a photo, against one of ten observed categories' },
     { id: 'detect', label: 'Object detection', note: 'coco-ssd@2.2.3 (lite_mobilenet_v2) scans frames for vehicles, signage and people' },
     { id: 'track', label: 'Tracking', note: 'civiquex-iou-tracker@1 follows a vehicle across frames rather than reading each one in isolation' },
-    { id: 'ocr', label: 'Plate OCR', note: 'tesseract.js@6 (English, plate charset) reads the plate from every usable frame in the track' },
+    { id: 'ocr', label: 'Plate OCR', note: 'Tesseract.js v7 (WASM), constrained to an A–Z0–9 charset, reads the plate from every usable frame in the track' },
     { id: 'score', label: 'Evidence scoring', note: 'Frames too small to carry real characters are excluded; agreement across readings produces a 0–100 evidence score and a cited best-evidence frame' },
     { id: 'rule', label: 'Rule match', note: 'The observed context is matched against a specific numbered rule and framed as a potential, not confirmed, violation' },
     { id: 'route', label: 'Routing & review', note: 'The report lands in the correct authority’s queue, triaged by evidence strength alongside any other reports correlated to the same location' },
@@ -501,15 +501,123 @@ export type ScaffoldSection = {
   awaiting?: string;
 };
 
-/** The product, its categories, pipeline and design decisions are
- *  documented above from the supplied screenshots; the implementation
- *  underneath it is not, so this stays a scaffold rather than a guess. */
-export const civiquexTechnical: ScaffoldSection[] = [
-  { id: 'architecture', n: '06', title: 'System architecture', body: null, awaiting: 'Services, data flow and deployment shape' },
-  { id: 'model', n: '07', title: 'Model and training', body: null, awaiting: 'How the detection and tracking models were selected, tuned or fine-tuned' },
-  { id: 'dataset', n: '08', title: 'Datasets', body: null, awaiting: 'Dataset sources, size and labelling method' },
-  { id: 'challenges', n: '09', title: 'Technical challenges', body: null, awaiting: 'The hard parts, and how they were resolved' },
+/** Architecture, model, dataset and engineering-challenge detail supplied
+ *  directly by the project's owner from the real codebase — kept as terse
+ *  as the rest of this file. Two honesty statements matter more than the
+ *  rest: no custom model was trained, and real-world plate accuracy is
+ *  unmeasured. Both are stated plainly rather than implied away. */
+export const civiquexArchitecture = {
+  summary:
+    'A citizen captures a photo or video of a hazard; the system grades how strong that evidence actually is, and routes only defensible cases to the correct authority.',
+  stack: [
+    'Next.js 14',
+    'TypeScript',
+    'Vercel serverless',
+    'PostgreSQL (Prisma, Neon)',
+    'Vercel Blob',
+    'MapLibre GL',
+    'TensorFlow.js',
+    'Tesseract WASM',
+  ],
+  flow: ['Capture', 'Resumable upload', 'Observation pipeline', 'Correlation, rules, confidence & routing', 'Graded incident', 'Authority submission'],
+  decisions: [
+    {
+      title: 'One gate for evidence',
+      body: 'Every byte of evidence is served through a single session-gated, audit-logged proxy route. Storage is private; the app never links a raw URL.',
+    },
+    {
+      title: 'Inference runs on the device',
+      body: 'Detection and OCR execute in the browser, so evidence imagery is never shipped to a third-party model for analysis.',
+    },
+    {
+      title: 'Processing state is separate from incident state',
+      body: 'Upload and analysis progress live in their own tables; only confirmed findings graduate into the incident graph.',
+    },
+    {
+      title: 'No opaque scores',
+      body: 'Every engine returns a decomposed, individually explainable breakdown rather than a single number presented as fact.',
+    },
+  ],
+};
+
+export const civiquexModel = {
+  headline: 'No custom model was trained — the engineering sits above the models, not inside one.',
+  models: [
+    { name: 'COCO-SSD (lite_mobilenet_v2)', use: 'Object detection, via TensorFlow.js, pretrained' },
+    { name: 'Tesseract.js v7 (WASM)', use: 'Plate OCR, constrained to an A–Z0–9 charset' },
+    { name: 'Sobel edge-gradient heuristic', use: 'Road-surface anomalies — labelled a heuristic, not a classifier, in the UI itself' },
+  ],
+  builtOnTop: [
+    'Temporal consensus across multiple frames, rather than trusting any single inference',
+    'A confusable-glyph model (0/O, 8/B, 5/S, 2/Z, 6/G) that leaves a character unresolved rather than settling it by majority vote',
+    'A contradiction engine — disagreement between visually distinct characters escalates to CONFLICTING',
+    'An adversarial self-check that can only ever make an outcome more conservative',
+    'Five explicit decision states — CONFIRMED, REVIEW_REQUIRED, PARTIALLY_READABLE, CONFLICTING, UNREADABLE — no result is forced into a readable answer',
+  ],
+  rule: 'Prefer UNREADABLE over a wrong identification. A false vehicle identification is more damaging than a missing one.',
+  versioning:
+    'Detector, tracker, OCR and pipeline versions are stamped onto every result, so a later model upgrade can’t silently change the meaning of historical evidence.',
+};
+
+export const civiquexDatasets = {
+  points: [
+    'Detection: pretrained COCO weights (80 classes), used as-is',
+    'OCR: Tesseract English traineddata, fetched on demand at runtime',
+    'Application data: a deterministic seeded demo dataset — road segments, regulations and authorities with GeoJSON jurisdiction boundaries, plus scripted scenarios covering a correlated incident graph, a recurring-location hotspot and independent re-verification',
+  ],
+  honesty:
+    'No proprietary dataset was collected and no training data was labelled. There is no labelled traffic-video benchmark behind this, so plate accuracy and false-assignment rate are unmeasured — the abstention and consensus logic is unit-tested against adversarial cases, but real-world recognition accuracy is not claimed.',
+};
+
+export type Challenge = { title: string; problem: string; fix: string; delta: string | null };
+
+export const civiquexChallenges: Challenge[] = [
+  {
+    title: 'Uploads exceeding the serverless limit',
+    problem: 'Video submissions failed outright — base64-over-JSON breached the platform’s ~4.5MB function body ceiling.',
+    fix: 'Moved to direct browser-to-storage upload, so file bytes bypass the API entirely.',
+    delta: null,
+  },
+  {
+    title: 'Resumable uploads with no SDK support',
+    problem: 'The storage SDK exposes no “list uploaded parts” API.',
+    fix: 'The database became the source of truth for resume state; raw bytes persist to IndexedDB before the first network call.',
+    delta: 'Verified by hard-refreshing mid-upload: a 33%-complete transfer resumed and re-sent only the missing parts.',
+  },
+  {
+    title: 'Nine sequential database round-trips per page',
+    problem: 'The ORM’s default strategy issues one round-trip per relation — against a remote database, ~500ms of pure latency each, regardless of query complexity.',
+    fix: 'Collapsed into real SQL JOINs.',
+    delta: '/api/incidents 6,435ms → 565ms · police queue 7.1s → 1.2s',
+  },
+  {
+    title: 'A submission pipeline that was sequential by accident',
+    problem: 'Creating one report issued 11+ dependent-looking database calls that were mostly independent.',
+    fix: 'Restructured so independent work runs concurrently, while keeping the one ordering that affects the confidence score.',
+    delta: '8–11s → ~1s',
+  },
+  {
+    title: 'A browser tab crash on video processing',
+    problem: 'The frame sampler retained every decoded full-resolution canvas — ~750MB at 1080p, sampled twice before the first batch released.',
+    fix: 'Rebuilt as a two-pass streaming pipeline: detect on downscaled frames and release each canvas immediately, then re-seek and decode only the four best frames at full resolution.',
+    delta: 'Peak heap 750MB (crashing) → 40MB · 49.7s → 23.3s',
+  },
+  {
+    title: 'A map that silently degraded twice',
+    problem: 'OpenStreetMap tiles failed silently — WebGL needs CORS to use an image as a texture. The replacement provider then required an API key and returned watermarked tiles instead of an error.',
+    fix: 'Settled on a keyless, CORS-correct provider and removed the environment override entirely.',
+    delta: null,
+  },
+  {
+    title: 'Silent plate truncation at low resolution',
+    problem: 'A 75px-wide crop returned a confidently-wrong nine-character plate at 95% confidence, having quietly dropped a character.',
+    fix: 'Raised the resolution gate to 120px (~12px per character) and pinned it with regression tests.',
+    delta: 'Such a crop is now refused outright; a truncated read mixed with full-resolution reads surfaces as CONFLICTING.',
+  },
 ];
+
+export const civiquexVerification =
+  '99 unit tests and 8 end-to-end browser tests. Performance and memory figures above were measured on a real 1080p upload against the deployed production build, not locally.';
 
 /** The product and its interface are documented above; the implementation
  *  underneath it is not yet, so this stays a scaffold rather than a guess. */

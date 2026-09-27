@@ -5,8 +5,15 @@ import CaseFooterNav from '@/components/case/CaseFooterNav';
 import { CaseProse, CaseSection } from '@/components/case/CaseSection';
 import PipelineDiagram from '@/components/case/PipelineDiagram';
 import ProductGallery from '@/components/case/ProductGallery';
-import ScaffoldSections from '@/components/case/ScaffoldSections';
-import { civiquex, civiquexTechnical, projectBySlug } from '@/data/projects';
+import {
+  civiquex,
+  civiquexArchitecture,
+  civiquexChallenges,
+  civiquexDatasets,
+  civiquexModel,
+  civiquexVerification,
+  projectBySlug,
+} from '@/data/projects';
 import { site } from '@/data/site';
 
 const project = projectBySlug('ai-violation-detection')!;
@@ -89,7 +96,89 @@ export default function ViolationDetectionCaseStudy() {
         </ol>
       </CaseSection>
 
-      <ScaffoldSections sections={civiquexTechnical} offset={5} />
+      <CaseSection n="06" label="Architecture" title="One gate for evidence, one gate for trust" lede={civiquexArchitecture.summary}>
+        <div className="mt-10">
+          <p className="label">Stack</p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {civiquexArchitecture.stack.map((t) => (
+              <li key={t} className="label rounded-full border border-glass-border px-3 py-1.5 text-bone-3">
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mt-8">
+          <p className="label">Flow</p>
+          <p className="mt-3 max-w-prose text-body text-bone-2">{civiquexArchitecture.flow.join(' → ')}</p>
+        </div>
+        <ul className="mt-10 grid gap-5 sm:grid-cols-2">
+          {civiquexArchitecture.decisions.map((d, i) => (
+            <li
+              key={d.title}
+              className="reveal group relative overflow-hidden rounded-lg border border-glass-border p-6 transition-[border-color,transform] duration-500 hover:-translate-y-1 hover:border-glass-borderStrong md:p-8"
+              style={{ transitionDelay: `${i * 70}ms` }}
+            >
+              <span aria-hidden className="absolute left-0 top-0 h-full w-px origin-top scale-y-0 bg-signature transition-transform duration-500 ease-out group-hover:scale-y-100" />
+              <p className="label metric">{String(i + 1).padStart(2, '0')}</p>
+              <h3 className="mt-4 text-h2 text-bone">{d.title}</h3>
+              <p className="mt-3 max-w-prose text-small text-bone-2">{d.body}</p>
+            </li>
+          ))}
+        </ul>
+      </CaseSection>
+
+      <CaseSection n="07" label="Model" title="No custom model — the engineering sits above it" lede={civiquexModel.headline}>
+        <ul className="mt-10 grid gap-6 sm:grid-cols-3">
+          {civiquexModel.models.map((m) => (
+            <li key={m.name} className="border-t border-glass-border pt-4">
+              <p className="text-body text-bone">{m.name}</p>
+              <p className="mt-1.5 text-small text-bone-3">{m.use}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-10">
+          <p className="label">Built on top of them</p>
+          <ul className="mt-4 space-y-2.5">
+            {civiquexModel.builtOnTop.map((b) => (
+              <li key={b} className="flex gap-2.5 text-small text-bone-2">
+                <span aria-hidden className="mt-2 h-px w-2.5 shrink-0 bg-signature" />
+                <span className="max-w-prose">{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="reveal mt-8 max-w-prose rounded-lg border border-signature/25 bg-signature/[0.06] p-6 text-body text-bone md:p-8">
+          {civiquexModel.rule}
+        </p>
+        <p className="label mt-6">{civiquexModel.versioning}</p>
+      </CaseSection>
+
+      <CaseSection n="08" label="Datasets" title="No proprietary data, no labelled benchmark">
+        <ul className="mt-8 space-y-3">
+          {civiquexDatasets.points.map((point) => (
+            <li key={point} className="border-t border-glass-border pt-3 text-small text-bone-2">
+              {point}
+            </li>
+          ))}
+        </ul>
+        <p className="label mt-8">{civiquexDatasets.honesty}</p>
+      </CaseSection>
+
+      <CaseSection n="09" label="Challenges" title="What actually broke, and by how much" lede="The engineering that doesn't show up in a screenshot — measured before and after, not asserted.">
+        <ol className="mt-10">
+          {civiquexChallenges.map((c, i) => (
+            <li key={c.title} className="reveal border-t border-glass-border py-8" style={{ transitionDelay: `${i * 50}ms` }}>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                <h3 className="text-h1 text-bone">{c.title}</h3>
+                {c.delta && <p className="metric font-mono text-small text-signature">{c.delta}</p>}
+              </div>
+              <p className="mt-3 max-w-prose text-small text-bone-2">{c.problem}</p>
+              <p className="mt-2 max-w-prose text-small text-bone-3">→ {c.fix}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="label mt-8">{civiquexVerification}</p>
+      </CaseSection>
 
       <CaseSection n="10" label="Try it" title="The live demo" lede="Four demo accounts — Citizen, two Authority roles and Admin — are on the sign-in screen; every role sees a different side of the same pipeline.">
         <div className="mt-10 flex flex-wrap gap-3">

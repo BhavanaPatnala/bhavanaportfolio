@@ -206,14 +206,28 @@ actually reading them — including opening the login screen to confirm the
 four demo roles (Citizen, two Authority roles, Admin), and reading the
 technical footnote on an incident's "why this result" panel to get the
 exact model names right: `coco-ssd@2.2.3 (lite_mobilenet_v2)` for
-detection, `civiquex-iou-tracker@1` for tracking, `tesseract.js@6` for
-plate OCR. The site's own honesty about uncertainty is the throughline of
-the "Decisions" section — a plate reading that disagrees across frames
+detection, `civiquex-iou-tracker@1` for tracking, `Tesseract.js v7 (WASM)`
+for plate OCR. The site's own honesty about uncertainty is the throughline
+of the "Decisions" section — a plate reading that disagrees across frames
 ships as "vehicle number could not be reliably determined," not a
 best-guess plate number, and every flag cites the specific rule it matched
 rather than asserting a verdict. `PipelineDiagram`, previously hardcoded
 to PerfOS's own seven stages, now takes a `stages` prop so both case
 studies share the one component instead of two near-identical copies.
+
+Sections 06–09 (Architecture, Model, Datasets, Technical Challenges) were
+scaffolds — "awaiting source material" — until the project's owner supplied
+the real content directly from the codebase. Rather than paste it in
+as-received, it's restructured into the same typed, componentised shape
+the rest of the page already uses: a stack as pills, the four architecture
+decisions as the same hover-card grid section 05 uses, and — the strongest
+material — seven engineering challenges each reduced to a title, the
+symptom, the fix, and (where one exists) a monospace before → after metric
+in the signature colour, so `/api/incidents 6,435ms → 565ms` reads as data,
+not as a sentence buried in a paragraph. Two honesty statements carried
+through unedited rather than softened: no custom model was trained, and
+real-world plate accuracy is unmeasured — both would fall apart under a
+single interview follow-up if overstated.
 
 ## Dev and QA never share a build
 
