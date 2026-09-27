@@ -6,8 +6,9 @@ now resolves** — Work, Experience, AI Lab, Recognition, About, Contact and
 Resume — plus the project index and all three case studies. Still to come:
 a dedicated technology-ecosystem section and a GitHub build log.
 
-Source at **https://github.com/BhavanaPatnala/bhavanaportfolio**; Vercel
-deployment in progress.
+Live at **https://bhavanaportfolio-ochre.vercel.app/**. Source at
+**https://github.com/BhavanaPatnala/bhavanaportfolio** — every push to
+`main` redeploys automatically.
 
 ```bash
 npm install
@@ -311,6 +312,17 @@ false` and `powerPreference: 'low-power'` are genuinely applied below
 averaged in the 40-50fps range with occasional dips — a large improvement
 over the prior state, which was zero rendering at all on most phones, not
 a slow one.
+
+All of the above was re-run against the actual live deployment
+(`https://bhavanaportfolio-ochre.vercel.app/`), not just the local build —
+0 accessibility violations, 27/27 interaction checks including the two
+mobile-tier regression guards, zero console or network errors across all
+five routes while scrolling the full page, no horizontal overflow at
+390px anywhere, and a screenshot confirming the Hero's 3D scene genuinely
+renders on a simulated mid-range phone hitting the production URL. A
+local build passing is not the same claim as production working — this is
+the first round verified directly against the deployed site rather than
+`localhost`.
 
 Two testing caveats worth keeping in mind before trusting any QA run here,
 both found and fixed this round:
