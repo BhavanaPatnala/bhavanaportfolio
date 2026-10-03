@@ -419,3 +419,35 @@ fail navigation, it only logs "Refused to…" to the console — a page with
 console listeners attached visits all 5 routes and confirms zero CSP
 violations actually fired. 40/40 interaction checks passed, 0/5
 accessibility violations, clean typecheck and QA build.
+
+## Dependency audit
+
+Third staged piece. `npm audit` surfaces 7 advisories (1 moderate, 6
+high), all on two chains: `braces`/`chokidar`/`micromatch` behind
+Tailwind 3's dev-time file watcher, and `postcss` bundled inside Next's
+own build pipeline. Both are build-time only — neither ships in the
+production bundle, and neither ever processes visitor-supplied input;
+`chokidar` walks developer-authored glob patterns from
+`tailwind.config.ts`, and `postcss` processes developer-authored CSS.
+The actual fix for either (`npm audit fix --force`) is a major-version
+jump — Tailwind 3→4 (a full config-system rewrite, from
+`tailwind.config.ts` to CSS-native `@theme`) or Next 15→16 — exactly the
+"blindly apply a fix that breaks the app" failure mode the CSP work
+above already reasoned through, just applied to dependencies instead of
+headers. Left as a known, documented, low-real-risk item rather than
+force-upgraded.
+
+What was safe to do: `npm update` picked up every patch/minor release
+already inside the existing `package.json` ranges (Next 15.5.25→15.5.27,
+`@react-three/fiber` 9.7.0→9.8.1, `three`, `@react-three/drei`, and
+others) — zero change to `package.json` itself, confirmed by diff, only
+`package-lock.json` moved. And a grep across the whole codebase for
+actual imports found `gsap` and `framer-motion` both fully unused —
+listed in `package.json`, resolved in `node_modules`, `framer-motion`
+even named in `next.config.mjs`'s `optimizePackageImports`, but zero
+`import` sites anywhere. Both removed; bundle sizes in the build output
+were unchanged before and after, confirming they were dev-time dead
+weight, never actually shipped to a visitor regardless.
+
+Re-verified after both changes: clean typecheck, clean build, 40/40
+interaction checks, 0/5 accessibility violations.

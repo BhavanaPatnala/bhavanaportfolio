@@ -70,7 +70,7 @@ const nextConfig = {
     deviceSizes: [390, 640, 828, 1080, 1280, 1600, 1920],
   },
   experimental: {
-    optimizePackageImports: ['framer-motion', 'three', '@react-three/drei'],
+    optimizePackageImports: ['three', '@react-three/drei'],
   },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
