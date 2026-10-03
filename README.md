@@ -544,3 +544,43 @@ synthetic lab score says.
 
 45/45 interaction checks, 0/5 accessibility violations, clean typecheck
 and QA build.
+
+## WebGL context loss — every scene degrades, none of them break
+
+Sixth staged piece, and another real gap rather than a new feature: zero
+lines in the codebase handled `webglcontextlost` before this. A GPU
+driver reset, too many simultaneous contexts, or a mobile OS reclaiming
+GPU memory on backgrounding would have left a canvas permanently black —
+exactly the "broken blank space" the brief's own error-states standard
+rules out, and a real failure mode for a site running 6 simultaneous
+WebGL contexts, not a hypothetical one.
+
+Centralized in the one hook every scene already shares,
+`use3DReadiness`, rather than duplicated as new state in all 6
+Scene/Canvas pairs: it now also returns `reportContextLost`, folded
+directly into the existing `showCanvas` boolean
+(`ready && tier !== null && tier !== 'low' && webglOk && !contextLost`).
+Because `showCanvas` already drives both the Canvas's presence and the
+fallback SVG's opacity crossfade in every Scene component, no Scene
+needed new conditional logic — each one just passes `reportContextLost`
+down to its Canvas as a new `onContextLost` prop, and each Canvas wires
+it into R3F's `onCreated` to attach a `webglcontextlost` listener on the
+real GL canvas element. On loss: `preventDefault()` (stops the browser
+treating it as fatal) and report up — the scene permanently falls back
+to its already-rendered static SVG rather than attempting a WebGL
+restore, which is more failure-prone than degrading once and staying
+degraded. The per-Canvas listener wiring is duplicated 6 times rather
+than further abstracted, matching this codebase's own existing
+convention (the DPR-capping logic in every Canvas is already duplicated
+the same way) rather than introducing a new abstraction style
+inconsistently.
+
+Verified with the real WebGL extension, not a mock: Puppeteer calls
+`gl.getExtension('WEBGL_lose_context').loseContext()` against the actual
+running canvas. First confirmed on Hero alone (canvas count 6→5, only
+Hero's removed, the other 5 scenes unaffected), then against all 6 in
+sequence (6→5→4→3→2→1→0), with the page confirmed still fully navigable
+and readable — nav present, main content intact — after every single
+context was lost. Two new permanent regression checks assert exactly
+that. 47/47 interaction checks, 0/5 accessibility violations, clean
+typecheck and build.

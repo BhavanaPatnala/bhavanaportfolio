@@ -165,6 +165,37 @@ await new Promise((r) => setTimeout(r, 2800));
 check('A genuinely low-end phone (2 cores, 1GB) still falls back to the static SVG', (await p.evaluate(() => document.querySelectorAll('canvas').length)) === 0);
 await p.close();
 
+// --- WebGL context loss: a real GPU failure mode (driver reset, too many
+// contexts, mobile OS reclaiming memory), not a hypothetical. Without a
+// handler the canvas just goes permanently black. Simulated with the real
+// WEBGL_lose_context extension, not a mock, across all 6 scenes — each
+// should individually fall back to its already-rendered static SVG, and
+// the page must stay fully usable once every context is gone. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2500));
+const canvasesBeforeLoss = await p.evaluate(() => document.querySelectorAll('canvas').length);
+for (let i = 0; i < canvasesBeforeLoss; i++) {
+  await p.evaluate(() => {
+    const canvas = document.querySelectorAll('canvas')[0];
+    const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+  });
+  await new Promise((r) => setTimeout(r, 500));
+}
+const canvasesAfterLoss = await p.evaluate(() => document.querySelectorAll('canvas').length);
+check(
+  'Every scene falls back to its static SVG after its WebGL context is lost',
+  canvasesBeforeLoss > 0 && canvasesAfterLoss === 0,
+  `${canvasesBeforeLoss} -> ${canvasesAfterLoss}`,
+);
+const pageUsableAfterLoss = await p.evaluate(
+  () => !!document.querySelector('nav[aria-label="Primary"]') && (document.querySelector('main')?.innerText.length ?? 0) > 500,
+);
+check('Page remains fully navigable and readable with every context lost', pageUsableAfterLoss);
+await p.close();
+
 // --- Link integrity ---
 p = await b.newPage();
 await p.setViewport({ width: 1440, height: 900 });

@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 const LayerStackCanvas = dynamic(() => import('./LayerStackCanvas'), { ssr: false });
 
 export default function EngineerScene({ className }: { className?: string }) {
-  const { tier, showCanvas } = use3DReadiness();
+  const { tier, showCanvas, reportContextLost } = use3DReadiness();
   const { ref, inView } = useInView<HTMLDivElement>();
 
   return (
@@ -20,7 +20,9 @@ export default function EngineerScene({ className }: { className?: string }) {
           showCanvas ? 'opacity-0' : 'opacity-100',
         )}
       />
-      {showCanvas && tier && <LayerStackCanvas tier={tier} frameloop={inView ? 'always' : 'never'} />}
+      {showCanvas && tier && (
+        <LayerStackCanvas tier={tier} frameloop={inView ? 'always' : 'never'} onContextLost={reportContextLost} />
+      )}
     </div>
   );
 }

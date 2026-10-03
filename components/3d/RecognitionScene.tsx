@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 const EvidenceFieldCanvas = dynamic(() => import('./EvidenceFieldCanvas'), { ssr: false });
 
 export default function RecognitionScene({ className }: { className?: string }) {
-  const { tier, showCanvas } = use3DReadiness();
+  const { tier, showCanvas, reportContextLost } = use3DReadiness();
   const { ref, inView } = useInView<HTMLDivElement>();
 
   return (
@@ -20,7 +20,9 @@ export default function RecognitionScene({ className }: { className?: string }) 
           showCanvas ? 'opacity-0' : 'opacity-100',
         )}
       />
-      {showCanvas && tier && <EvidenceFieldCanvas tier={tier} frameloop={inView ? 'always' : 'never'} />}
+      {showCanvas && tier && (
+        <EvidenceFieldCanvas tier={tier} frameloop={inView ? 'always' : 'never'} onContextLost={reportContextLost} />
+      )}
     </div>
   );
 }

@@ -18,7 +18,7 @@ export default function JourneyScene({
   progress: RefObject<number>;
   activeStage: RefObject<number>;
 }) {
-  const { tier, showCanvas } = use3DReadiness();
+  const { tier, showCanvas, reportContextLost } = use3DReadiness();
   const { ref, inView } = useInView<HTMLDivElement>();
 
   return (
@@ -30,7 +30,13 @@ export default function JourneyScene({
         )}
       />
       {showCanvas && tier && (
-        <JourneyCanvas tier={tier} progress={progress} activeStage={activeStage} frameloop={inView ? 'always' : 'never'} />
+        <JourneyCanvas
+          tier={tier}
+          progress={progress}
+          activeStage={activeStage}
+          frameloop={inView ? 'always' : 'never'}
+          onContextLost={reportContextLost}
+        />
       )}
     </div>
   );

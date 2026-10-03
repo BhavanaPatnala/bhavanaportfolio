@@ -5,7 +5,15 @@ import { useEffect, useState } from 'react';
 import LayerStack from './LayerStack';
 import type { DeviceTier } from '@/lib/deviceTier';
 
-export default function LayerStackCanvas({ tier, frameloop = 'always' }: { tier: DeviceTier; frameloop?: 'always' | 'never' }) {
+export default function LayerStackCanvas({
+  tier,
+  frameloop = 'always',
+  onContextLost,
+}: {
+  tier: DeviceTier;
+  frameloop?: 'always' | 'never';
+  onContextLost?: () => void;
+}) {
   const [dpr, setDpr] = useState(1);
   useEffect(() => {
     const cap = tier === 'high' ? 2 : tier === 'medium' ? 1.25 : 1;
@@ -24,6 +32,16 @@ export default function LayerStackCanvas({ tier, frameloop = 'always' }: { tier:
       camera={{ position: [0, 0, 5], fov: 40 }}
       shadows={false}
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      onCreated={(state) => {
+        state.gl.domElement.addEventListener(
+          'webglcontextlost',
+          (e) => {
+            e.preventDefault();
+            onContextLost?.();
+          },
+          { once: true },
+        );
+      }}
     >
       <ambientLight intensity={0.6} />
       <LayerStack tier={tier} />

@@ -16,7 +16,7 @@ const HeroCanvas = dynamic(() => import('./HeroCanvas'), { ssr: false });
  * keep the site fully usable" rather than a degraded, still-animated scene.
  */
 export default function HeroScene({ className }: { className?: string }) {
-  const { tier, showCanvas } = use3DReadiness();
+  const { tier, showCanvas, reportContextLost } = use3DReadiness();
   const { ref, inView } = useInView<HTMLDivElement>();
 
   // Always absolutely positioned, filling its nearest positioned ancestor —
@@ -31,7 +31,9 @@ export default function HeroScene({ className }: { className?: string }) {
           showCanvas ? 'opacity-0' : 'opacity-100',
         )}
       />
-      {showCanvas && tier && <HeroCanvas tier={tier} frameloop={inView ? 'always' : 'never'} />}
+      {showCanvas && tier && (
+        <HeroCanvas tier={tier} frameloop={inView ? 'always' : 'never'} onContextLost={reportContextLost} />
+      )}
     </div>
   );
 }

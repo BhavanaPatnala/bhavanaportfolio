@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { detectDeviceTier, type DeviceTier } from './deviceTier';
 
 type IdleWindow = Window & {
@@ -10,15 +10,25 @@ type IdleWindow = Window & {
 
 /**
  * The shared adaptive gate every 3D section uses: device tier, a real
- * WebGL capability check, and idle-deferred readiness so a heavy Three.js
- * chunk never competes with first interaction. Extracted once so each new
- * section's scene wrapper is a few lines, not a re-implementation of this
- * logic — see HeroScene for the pattern this replaced.
+ * WebGL capability check, idle-deferred readiness so a heavy Three.js
+ * chunk never competes with first interaction, and a context-loss escape
+ * hatch. `webglOk` only catches "WebGL never worked" (checked once, at
+ * mount, against a throwaway canvas) — it says nothing about a context
+ * that was rendering fine and then got lost at runtime (a GPU driver
+ * reset, too many contexts, a mobile OS reclaiming GPU memory on
+ * backgrounding). `reportContextLost` is what a Canvas component calls
+ * from its own `webglcontextlost` listener; once called, `showCanvas`
+ * permanently flips to false for that mount, same as any other failure
+ * mode here — falling back to the already-rendered static SVG rather
+ * than attempting a WebGL context restore, which the brief's own "don't
+ * leave a broken blank space" standard doesn't require and which is
+ * meaningfully more failure-prone than just degrading gracefully once.
  */
 export function use3DReadiness() {
   const [tier, setTier] = useState<DeviceTier | null>(null);
   const [webglOk, setWebglOk] = useState(true);
   const [ready, setReady] = useState(false);
+  const [contextLost, setContextLost] = useState(false);
 
   useEffect(() => {
     setTier(detectDeviceTier());
@@ -39,5 +49,11 @@ export function use3DReadiness() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
-  return { tier, showCanvas: ready && tier !== null && tier !== 'low' && webglOk };
+  const reportContextLost = useCallback(() => setContextLost(true), []);
+
+  return {
+    tier,
+    showCanvas: ready && tier !== null && tier !== 'low' && webglOk && !contextLost,
+    reportContextLost,
+  };
 }

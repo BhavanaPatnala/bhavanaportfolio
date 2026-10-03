@@ -10,11 +10,13 @@ export default function JourneyCanvas({
   progress,
   activeStage,
   frameloop = 'always',
+  onContextLost,
 }: {
   tier: DeviceTier;
   progress: RefObject<number>;
   activeStage: RefObject<number>;
   frameloop?: 'always' | 'never';
+  onContextLost?: () => void;
 }) {
   const [dpr, setDpr] = useState(1);
   useEffect(() => {
@@ -34,6 +36,16 @@ export default function JourneyCanvas({
       camera={{ position: [-1, 0, 5], fov: 45 }}
       shadows={false}
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      onCreated={(state) => {
+        state.gl.domElement.addEventListener(
+          'webglcontextlost',
+          (e) => {
+            e.preventDefault();
+            onContextLost?.();
+          },
+          { once: true },
+        );
+      }}
     >
       <ambientLight intensity={0.6} />
       <JourneyPath tier={tier} progress={progress} activeStage={activeStage} />

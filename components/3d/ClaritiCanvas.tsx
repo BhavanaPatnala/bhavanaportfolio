@@ -9,10 +9,12 @@ export default function ClaritiCanvas({
   tier,
   progress,
   frameloop = 'always',
+  onContextLost,
 }: {
   tier: DeviceTier;
   progress: RefObject<number>;
   frameloop?: 'always' | 'never';
+  onContextLost?: () => void;
 }) {
   const [dpr, setDpr] = useState(1);
   useEffect(() => {
@@ -32,6 +34,16 @@ export default function ClaritiCanvas({
       camera={{ position: [0, 0, 6.5], fov: 38 }}
       shadows={false}
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      onCreated={(state) => {
+        state.gl.domElement.addEventListener(
+          'webglcontextlost',
+          (e) => {
+            e.preventDefault();
+            onContextLost?.();
+          },
+          { once: true },
+        );
+      }}
     >
       <ambientLight intensity={0.6} />
       <ClaritiLayers tier={tier} progress={progress} />

@@ -10,7 +10,15 @@ import type { DeviceTier } from '@/lib/deviceTier';
  * only client-side via dynamic import (see HeroScene) so it never touches
  * SSR and never ships to a visitor who won't render it.
  */
-export default function HeroCanvas({ tier, frameloop = 'always' }: { tier: DeviceTier; frameloop?: 'always' | 'never' }) {
+export default function HeroCanvas({
+  tier,
+  frameloop = 'always',
+  onContextLost,
+}: {
+  tier: DeviceTier;
+  frameloop?: 'always' | 'never';
+  onContextLost?: () => void;
+}) {
   const [dpr, setDpr] = useState(1);
 
   useEffect(() => {
@@ -30,6 +38,23 @@ export default function HeroCanvas({ tier, frameloop = 'always' }: { tier: Devic
       camera={{ position: [0, 0, 5.2], fov: 42 }}
       shadows={false}
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      // A lost GPU context (driver reset, too many contexts, mobile OS
+      // reclaiming memory) otherwise leaves the canvas permanently black
+      // with no recovery. preventDefault() keeps the browser from treating
+      // this as fatal; reportContextLost flips the scene back to its
+      // already-rendered static fallback rather than attempting a WebGL
+      // restore, which is more failure-prone than degrading once and
+      // staying degraded.
+      onCreated={(state) => {
+        state.gl.domElement.addEventListener(
+          'webglcontextlost',
+          (e) => {
+            e.preventDefault();
+            onContextLost?.();
+          },
+          { once: true },
+        );
+      }}
     >
       <ambientLight intensity={0.55} />
       <directionalLight position={[3, 2, 4]} intensity={1.1} color="#E07A4C" />
