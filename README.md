@@ -378,3 +378,44 @@ Verified with 6 new permanent regression checks in `interactions.mjs`
 matching entries, Escape closes and returns focus to the trigger, and
 selecting a result actually navigates) — 33/33 total, plus a fresh 0/5
 accessibility pass and a build/typecheck pass, before anything shipped.
+
+## Security headers
+
+Second staged piece: the site ships a real `Content-Security-Policy` plus
+`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
+`Permissions-Policy` and `Strict-Transport-Security`, all set in
+`next.config.mjs`'s `headers()` — no middleware, so it costs nothing extra
+at the edge and applies identically to `next start` and the Vercel
+deployment.
+
+The policy itself came from auditing the app, not from a template: grepped
+the whole codebase first for `dangerouslySetInnerHTML` (one use — the
+static Person JSON-LD in `layout.tsx`, built from `site.ts` with no
+user-controllable input, confirmed safe rather than assumed safe), `eval`/
+`Function()`/`innerHTML =` (zero), every `target="_blank"` (all already
+paired with `rel="noopener noreferrer"`), `<form>` (none exist), and every
+image source (all local — `next/image`, no remote `domains`/
+`remotePatterns` configured). That audit is what let most directives go to
+`'none'`/`'self'`: `frame-src 'none'`, `object-src 'none'`,
+`form-action 'none'`, `frame-ancestors 'none'`, `connect-src 'self'` — a
+site that actually talked to other origins would need a wider policy, not
+a stricter-looking one that happens to break on first load.
+
+`script-src`/`style-src` keep `'unsafe-inline'` deliberately rather than
+silently: Next's App Router inlines its own hydration payload on every
+static page, and a real nonce-based CSP would mean opting the whole site
+out of static prerendering via middleware for that alone. The codebase
+also uses inline `style={{transitionDelay}}` props and a few
+component-scoped `<style>` keyframe blocks throughout (Recognition, AI
+Lab, the command palette) — removing `'unsafe-inline'` without a nonce or
+hash allowlist breaks those outright, which is precisely the "blindly
+added a CSP that breaks the app" failure mode. Since the earlier audit
+found no live injection point for it to protect against, this is a
+documented defense-in-depth trade-off, not a current gap.
+
+Verified with 7 new permanent checks: the five custom headers resolve on
+a direct fetch of `/`, and — because a CSP violation doesn't throw or
+fail navigation, it only logs "Refused to…" to the console — a page with
+console listeners attached visits all 5 routes and confirms zero CSP
+violations actually fired. 40/40 interaction checks passed, 0/5
+accessibility violations, clean typecheck and QA build.

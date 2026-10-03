@@ -212,6 +212,34 @@ await p.close();
 const r = await fetch(BASE + '/resume');
 check('/resume resolves', r.ok, String(r.status));
 
+// --- Security headers: present on every response, and the CSP doesn't
+// silently break the app. A CSP violation doesn't throw or fail
+// navigation — Chrome only logs "Refused to..." to the console — so the
+// only way to actually catch a breakage is to listen for it directly,
+// across every route, not just assume the policy is compatible. ---
+const headerRes = await fetch(BASE + '/');
+const cspHeader = headerRes.headers.get('content-security-policy');
+check('CSP header present', !!cspHeader, cspHeader ? cspHeader.slice(0, 50) + '…' : 'missing');
+check('X-Content-Type-Options: nosniff present', headerRes.headers.get('x-content-type-options') === 'nosniff');
+check('X-Frame-Options: DENY present', headerRes.headers.get('x-frame-options') === 'DENY');
+check('Referrer-Policy present', !!headerRes.headers.get('referrer-policy'));
+check('Permissions-Policy present', !!headerRes.headers.get('permissions-policy'));
+check('Strict-Transport-Security present', !!headerRes.headers.get('strict-transport-security'));
+
+p = await b.newPage();
+const consoleErrors = [];
+p.on('console', (msg) => {
+  if (msg.type() === 'error') consoleErrors.push(msg.text());
+});
+p.on('pageerror', (err) => consoleErrors.push(String(err)));
+for (const route of ['/', '/resume', '/work/perf-os', '/work/aveniq', '/work/ai-violation-detection']) {
+  await p.goto(BASE + route, { waitUntil: 'domcontentloaded', timeout: 45000 });
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+}
+const cspViolations = consoleErrors.filter((e) => /content security policy|refused to/i.test(e));
+check('No CSP violations across all 5 routes', cspViolations.length === 0, cspViolations.slice(0, 3).join(' | '));
+await p.close();
+
 await b.close();
 console.log(out.join('\n'));
 console.log(`\n${out.filter((l) => l.startsWith('PASS')).length}/${out.length} passed`);
