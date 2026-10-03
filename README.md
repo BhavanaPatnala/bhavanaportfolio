@@ -451,3 +451,39 @@ weight, never actually shipped to a visitor regardless.
 
 Re-verified after both changes: clean typecheck, clean build, 40/40
 interaction checks, 0/5 accessibility violations.
+
+## Build log
+
+Fourth staged piece: a quiet line in the footer — "Build log — N public
+repositories · last shipped X ago" — built entirely server-side as an
+async Server Component (`BuildLog.tsx`) that calls GitHub's public REST
+API with Next's own fetch caching (`revalidate: 3600`), not a client-side
+request. That architecture choice resolves most of the brief's own
+"GitHub" requirements as a side effect rather than separate work: it
+can't block rendering (it's baked into the static HTML the same way the
+rest of the page is — confirmed in the build output, every route now
+shows `Revalidate: 1h`), it can't need a CSP change (the browser never
+makes the request, so `connect-src` is untouched), and it can't multiply
+GitHub's rate limit per visitor (one fetch per hour, shared by every
+visitor through Vercel's ISR, nowhere near the 60/hour unauthenticated
+ceiling).
+
+Deliberately coarse about what it shows. The brief's own example was
+"last commit to repo X," but that names a specific repository with no
+human review in the loop — an old fork or scratch repo surfacing itself
+on a recruiter-facing site is a real brand risk for very little
+narrative gain. What renders instead is two aggregate, unembarrassable
+numbers: public repo count, and a recency bucket ("today" / "N days
+ago" / "N months ago") computed from the most recently pushed repo's
+timestamp, never the repo's name. Both numbers are live-fetched, never
+invented; if GitHub is unreachable at build time the component returns
+`null` and the footer simply doesn't show that line — no placeholder,
+no stale number, no broken state.
+
+Verified live at build time, not just assumed to work: the QA build's
+rendered HTML was inspected directly and showed real data ("3 public
+repositories · last shipped today"). Added one new permanent check that
+asserts the footer is in exactly one of the two acceptable states —
+real data, or quietly absent — and never a leaked `undefined`/`NaN`/
+`[object Object]` from a broken fallback path. 41/41 interaction checks,
+0/5 accessibility violations, clean typecheck and build.

@@ -240,6 +240,24 @@ const cspViolations = consoleErrors.filter((e) => /content security policy|refus
 check('No CSP violations across all 5 routes', cspViolations.length === 0, cspViolations.slice(0, 3).join(' | '));
 await p.close();
 
+// --- Build log: a live GitHub fetch at build time, not a claimed number —
+// so the only two acceptable states are "real data rendered" or "quietly
+// absent" (GitHub unreachable at build time). An error string, "NaN", or
+// "undefined" leaking into the footer would mean the graceful-fallback
+// path itself is broken. ---
+p = await b.newPage();
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 800));
+const footerText = await p.evaluate(() => document.querySelector('footer')?.textContent ?? '');
+const hasBuildLog = /Build log — \d+ public repositories/.test(footerText);
+const hasBrokenState = /undefined|NaN|\[object Object\]/.test(footerText);
+check(
+  'Build log shows real data or is gracefully absent, never a broken state',
+  !hasBrokenState && (hasBuildLog || !footerText.includes('Build log')),
+  hasBuildLog ? 'live data rendered' : 'absent (no data at build time)',
+);
+await p.close();
+
 await b.close();
 console.log(out.join('\n'));
 console.log(`\n${out.filter((l) => l.startsWith('PASS')).length}/${out.length} passed`);

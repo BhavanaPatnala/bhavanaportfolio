@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { site } from '@/data/site';
+import BuildLog from '@/components/ui/BuildLog';
 
 const values = ['Engineering', 'Curiosity', 'AI', 'Attention to detail'];
 
@@ -66,6 +68,12 @@ export default function SiteFooter() {
             Next.js · React Three Fiber · TypeScript · Tailwind · Geist · No analytics, no trackers
           </p>
           <p className="label metric text-bone-4">© {new Date().getFullYear()}</p>
+        </div>
+
+        <div className="mt-4">
+          <Suspense fallback={null}>
+            <BuildLog />
+          </Suspense>
         </div>
       </div>
     </footer>
