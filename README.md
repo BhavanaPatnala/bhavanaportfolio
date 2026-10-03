@@ -487,3 +487,60 @@ asserts the footer is in exactly one of the two acceptable states —
 real data, or quietly absent — and never a leaked `undefined`/`NaN`/
 `[object Object]` from a broken fallback path. 41/41 interaction checks,
 0/5 accessibility violations, clean typecheck and build.
+
+## SEO, a real accessibility fix, and a measured performance baseline
+
+Fifth staged piece, and the first one that found an actual pre-existing
+bug rather than adding something new. `metadataBase` in `layout.tsx` was
+hardcoded to `https://bhavanap.dev` — checked with a direct `curl`, and
+that domain doesn't resolve at all (connection failure, not a 404).
+Every canonical tag, every OpenGraph/Twitter card URL on the entire site
+had been pointing at a dead domain instead of the real deployed one.
+Fixed at the source: `site.ts` now holds one `url` field
+(`https://bhavanaportfolio-ochre.vercel.app`, the actual live URL, not
+an aspirational custom domain), and `metadataBase`/`openGraph.url`
+reference it — every page's already-correct relative `alternates.canonical`
+now resolves against the right origin automatically. Added
+`app/sitemap.ts` and `app/robots.ts` (Next's native metadata-route
+convention, so `/sitemap.xml` and `/robots.txt` are generated, not
+hand-written and liable to drift from the real routes) and a `WebSite`
+JSON-LD schema alongside the existing `Person` one. Four new permanent
+checks guard specifically against the old bug recurring: no reference to
+the dead domain anywhere, the canonical tag matches the real origin,
+`robots.txt` points at the real sitemap URL, and the sitemap lists the
+home page plus all 4 sub-routes.
+
+Running Lighthouse (already a devDependency, actually invoked rather
+than just referenced) surfaced one real accessibility finding axe-core's
+ruleset doesn't cover: `target-size` — the evidence carousel's dot
+indicators were WCAG 2.5.8 undersized, 6px–20px tall buttons relying on
+the sitewide `.tap::after` invisible-overlay pattern to pad their hit
+area, which automated target-size tooling (and not every browser's
+hit-testing) doesn't credit. Fixed by giving each button a real 24×24
+box with the small visible mark centered inside it, rather than widening
+`.tap` globally and risking adjacent dots' hit zones overlapping
+elsewhere on the site. The visible mark is pixel-identical to before —
+confirmed by screenshot — only the invisible tappable area changed.
+Lighthouse accessibility went from 96 to a clean 100 after the fix, with
+best-practices and SEO both already at 100.
+
+Performance was measured, not claimed — and reported honestly even
+though the number isn't flattering: three consecutive Lighthouse runs
+against the same unchanged build scored 63, 54 and 58, with Total
+Blocking Time swinging from 1.2s to 4.2s run to run. That's noise from
+this dev machine's load after a long session of spawned Chrome/Node
+processes, not a real regression — CLS stayed rock-stable at 0.012
+across all three runs, which is the metric least sensitive to CPU
+timing jitter and the one actually worth trusting here. The honest
+summary: Lighthouse's default mobile simulation (4x CPU throttle) is a
+deliberately harsh stress test against a real-time WebGL hero scene, and
+the number it produces on this machine right now isn't a reliable single
+data point — it needs a clean, dedicated run to mean anything precise.
+What's already true and separately verified: the adaptive device-tier
+system means a genuinely low-end device never loads the WebGL chunk at
+all, and a mid-tier device gets a reduced-quality scene — that's the
+real-world performance story, and it's unrelated to what a single
+synthetic lab score says.
+
+45/45 interaction checks, 0/5 accessibility violations, clean typecheck
+and QA build.

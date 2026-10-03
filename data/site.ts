@@ -4,6 +4,11 @@
  * site (D:\Portfolio) — reused rather than re-derived, so nothing drifts.
  */
 export const site = {
+  // The actual deployed URL — not an aspirational custom domain. Canonical
+  // tags, OpenGraph, the sitemap and robots.txt all derive from this single
+  // value, so if a custom domain is ever added, this is the one line that
+  // needs to change.
+  url: 'https://bhavanaportfolio-ochre.vercel.app',
   name: 'Bhavana P',
   role: 'Principal Software Engineer',
   company: 'Triad Software Private Limited',

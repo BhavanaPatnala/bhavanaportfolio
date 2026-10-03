@@ -30,7 +30,7 @@ const mono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bhavanap.dev'),
+  metadataBase: new URL(site.url),
   title: {
     default: `${site.name} — ${site.role}`,
     template: `%s — ${site.name}`,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
   openGraph: {
     type: 'profile',
-    url: 'https://bhavanap.dev',
+    url: site.url,
     siteName: `${site.name} — ${site.role}`,
     title: `${site.name} — ${site.role}`,
     description: site.summary,
@@ -80,6 +80,14 @@ const personJsonLd = {
   knowsAbout: ['Angular', 'TypeScript', 'Frontend architecture', 'Frontend performance engineering', 'AI-assisted developer tooling'],
 };
 
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: `${site.name} — ${site.role}`,
+  url: site.url,
+  description: site.summary,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
@@ -100,6 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
         </noscript>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       </body>
     </html>
   );

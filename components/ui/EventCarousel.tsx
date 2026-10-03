@@ -117,19 +117,30 @@ export default function EventCarousel({
             →
           </button>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center gap-1.5 pb-3">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-1">
             {photos.map((_, i) => (
+              // The visible mark stays exactly as small as before — only the
+              // button's own box grows to a real 24x24 hit target, since an
+              // invisible ::after overlay (the usual .tap pattern) isn't
+              // credited by automated target-size checks or every browser's
+              // hit-testing, and at 6px tall these dots were measurably
+              // under the WCAG 2.5.8 minimum.
               <button
                 key={i}
                 type="button"
                 onClick={() => setIndex(i)}
                 aria-label={`Go to photo ${i + 1}`}
                 aria-current={i === index}
-                className={cn(
-                  'tap pointer-events-auto h-1.5 rounded-full transition-all duration-300',
-                  i === index ? 'w-5 bg-bone' : 'w-1.5 bg-bone/40 hover:bg-bone/70',
-                )}
-              />
+                className="group flex h-6 w-6 items-center justify-center pointer-events-auto"
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    'block h-1.5 rounded-full transition-all duration-300',
+                    i === index ? 'w-5 bg-bone' : 'w-1.5 bg-bone/40 group-hover:bg-bone/70',
+                  )}
+                />
+              </button>
             ))}
           </div>
         </>

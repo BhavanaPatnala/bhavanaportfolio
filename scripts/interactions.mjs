@@ -212,6 +212,33 @@ await p.close();
 const r = await fetch(BASE + '/resume');
 check('/resume resolves', r.ok, String(r.status));
 
+// --- SEO: canonical/OG URLs used to point at a dead placeholder domain
+// (bhavanap.dev, which doesn't resolve) instead of the real deployed URL —
+// a real bug, not a hypothetical, so it gets a permanent regression guard
+// rather than just a one-time fix. These always check against the fixed
+// production origin (metadataBase), not BASE — canonical URLs are meant to
+// stay constant regardless of which host actually served the request; that
+// they don't vary is the correct behaviour, not something to assert away. ---
+const CANONICAL_ORIGIN = 'https://bhavanaportfolio-ochre.vercel.app';
+const homeHtml = await (await fetch(BASE + '/')).text();
+check('No references to the dead bhavanap.dev placeholder domain', !homeHtml.includes('bhavanap.dev'));
+check(
+  'Canonical tag points at the real deployed origin',
+  homeHtml.includes(`<link rel="canonical" href="${CANONICAL_ORIGIN}"`),
+);
+
+const robotsTxt = await (await fetch(BASE + '/robots.txt')).text();
+check('robots.txt resolves and references the real sitemap URL', robotsTxt.includes(`${CANONICAL_ORIGIN}/sitemap.xml`));
+
+const sitemapXml = await (await fetch(BASE + '/sitemap.xml')).text();
+const sitemapHasAllRoutes = ['/resume', '/work/perf-os', '/work/ai-violation-detection', '/work/aveniq'].every(
+  (route) => sitemapXml.includes(`${CANONICAL_ORIGIN}${route}`),
+);
+check(
+  'sitemap.xml lists the home page and all 4 sub-routes',
+  sitemapXml.includes(`<loc>${CANONICAL_ORIGIN}</loc>`) && sitemapHasAllRoutes,
+);
+
 // --- Security headers: present on every response, and the CSP doesn't
 // silently break the app. A CSP violation doesn't throw or fail
 // navigation — Chrome only logs "Refused to..." to the console — so the
