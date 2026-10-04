@@ -3,16 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { EventRecord } from '@/data/events';
+import { useReducedMotion } from '@/lib/useMedia';
 import EventCarousel from './EventCarousel';
 import Lightbox, { type LightboxItem } from './Lightbox';
 
 /** A horizontally-scrolling archive of jury/evaluator evidence. An event
  *  with no photos yet renders a labelled empty plate — never a broken
- *  image or an invented one. */
+ *  image or an invented one. The card nearest the centre of the rail sits
+ *  forward in depth; the others recede with distance. */
 export default function EvidenceGallery({ events }: { events: EventRecord[] }) {
   const railRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState<{ event: string; index: number } | null>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
+  const reduceMotion = useReducedMotion();
 
   const measure = useCallback(() => {
     const el = railRef.current;
@@ -31,6 +34,43 @@ export default function EvidenceGallery({ events }: { events: EventRecord[] }) {
       window.removeEventListener('resize', measure);
     };
   }, [measure]);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    if (reduceMotion) {
+      rail.querySelectorAll<HTMLElement>(':scope > li').forEach((li) => {
+        li.style.transform = '';
+        li.style.opacity = '';
+      });
+      return;
+    }
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = rail.getBoundingClientRect();
+      const centre = rect.left + rect.width / 2;
+      const half = rect.width / 2;
+      rail.querySelectorAll<HTMLElement>(':scope > li').forEach((li) => {
+        const r = li.getBoundingClientRect();
+        const distance = Math.min(1, Math.abs(r.left + r.width / 2 - centre) / half);
+        const depth = 1 - distance;
+        li.style.transform = `translateZ(${-70 + 70 * depth}px) scale(${0.9 + 0.1 * depth})`;
+        li.style.opacity = String(0.5 + 0.5 * depth);
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    rail.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      rail.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
+  }, [reduceMotion]);
 
   const scrollBy = (dir: number) => {
     const el = railRef.current;
@@ -80,6 +120,7 @@ export default function EvidenceGallery({ events }: { events: EventRecord[] }) {
         tabIndex={0}
         aria-label="Event evidence"
         className="mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [scrollbar-width:thin]"
+        style={{ perspective: '1400px' }}
       >
         {events.map((event) => {
           const hasPhotos = event.photos.length > 0;

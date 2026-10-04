@@ -845,3 +845,27 @@ tile. Judged by a desktop screenshot, not by a scripted depth test.
 
 58/58 interaction checks, 0/5 accessibility violations, zero lint errors and
 warnings, clean typecheck and QA build.
+
+## The evidence gallery, with real depth
+
+The event-evidence rail now reads spatially: the card nearest the centre of
+the viewport sits forward — full scale, full opacity — and the others recede
+with distance, dimmed and slightly shrunk. One `requestAnimationFrame` loop
+on scroll updates every card's `translateZ`/`scale`/`opacity` directly via
+the DOM (no React state, no re-render per frame); `perspective` on the rail
+projects it. Horizontal scrolling, the arrow buttons, each event's own
+carousel and the Lightbox are all unchanged.
+
+A real bug surfaced while verifying this, not assumed clean: `useReducedMotion`
+resolves `false` on the first render and flips `true` after mount, so the
+depth effect's reduced-motion guard (`if (reduceMotion) return`) let the first
+pass apply transforms before the hook had resolved — reduced-motion users were
+left with the depth effect's styles permanently baked onto the cards, never
+cleared. Fixed by explicitly clearing every card's transform and opacity when
+reduced motion is detected, rather than just skipping the effect.
+
+Verified: the centred card computes to `scale ≈ 1`, the edge cards to
+`scale 0.9`; reduced motion leaves every card's inline style empty; the
+Lightbox still opens from a carousel photo; zero horizontal overflow at 1440
+or 390. 60/60 interaction checks, 0/5 accessibility violations, zero lint
+errors and warnings, clean typecheck and QA build.

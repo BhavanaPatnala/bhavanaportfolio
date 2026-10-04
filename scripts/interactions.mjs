@@ -221,6 +221,32 @@ await new Promise((r) => setTimeout(r, 900));
 check('Reduced motion keeps certificate sheets still on hover', await p.evaluate(() => getComputedStyle(document.querySelector('button[aria-label^="View "]')).transform === 'none'));
 await p.close();
 
+// --- Evidence gallery depth: the card nearest the centre sits forward, the
+// others recede, and reduced motion leaves every card untransformed. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2000));
+await p.evaluate(() => document.querySelector('ul[aria-label="Event evidence"]').scrollIntoView({ block: 'center' }));
+await new Promise((r) => setTimeout(r, 1200));
+const depthState = await p.evaluate(() => {
+  const items = [...document.querySelectorAll('ul[aria-label="Event evidence"] > li')];
+  const scales = items.map((li) => parseFloat(li.style.transform.match(/scale\(([\d.]+)\)/)?.[1] ?? '0'));
+  return { max: Math.max(...scales), min: Math.min(...scales), count: items.length };
+});
+check('Evidence gallery: centred card sits forward, others recede', depthState.count > 1 && depthState.max > 0.98 && depthState.min < 0.95, JSON.stringify(depthState));
+await p.close();
+
+p = await b.newPage();
+await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2000));
+await p.evaluate(() => document.querySelector('ul[aria-label="Event evidence"]').scrollIntoView({ block: 'center' }));
+await new Promise((r) => setTimeout(r, 1200));
+check('Reduced motion leaves evidence cards untransformed', await p.evaluate(() => [...document.querySelectorAll('ul[aria-label="Event evidence"] > li')].every((li) => !li.style.transform)));
+await p.close();
+
 // --- Reflow: WCAG 1.4.10 requires content to reflow without horizontal
 // scrolling at 320 CSS px (the equivalent of 400% zoom on a 1280 screen). ---
 p = await b.newPage();
