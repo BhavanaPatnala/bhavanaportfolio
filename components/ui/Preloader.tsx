@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 
+// The draw animation finishes around 1.4s, so the intro never releases sooner
+// than MIN_MS. After that it waits only for the parsed document (DOMContentLoaded),
+// not the full load event, so late images and the 3D chunk never hold the
+// critical content behind the intro. MAX_MS caps the wait regardless.
+const MIN_MS = 1200;
 const MAX_MS = 1800;
 
 /**
@@ -20,14 +25,31 @@ export default function Preloader() {
       setDone(true);
       return;
     }
-    const t = window.setTimeout(() => setDone(true), MAX_MS);
-    const onDismiss = () => setDone(true);
-    window.addEventListener('keydown', onDismiss);
-    window.addEventListener('pointerdown', onDismiss);
+    const start = performance.now();
+    let loaded = document.readyState !== 'loading';
+    let minTimer = 0;
+    const finish = () => setDone(true);
+    const tryFinish = () => {
+      const elapsed = performance.now() - start;
+      if (!loaded) return;
+      if (elapsed >= MIN_MS) finish();
+      else minTimer = window.setTimeout(finish, MIN_MS - elapsed);
+    };
+    const onLoad = () => {
+      loaded = true;
+      tryFinish();
+    };
+    const capTimer = window.setTimeout(finish, MAX_MS);
+    document.addEventListener('DOMContentLoaded', onLoad);
+    tryFinish();
+    window.addEventListener('keydown', finish);
+    window.addEventListener('pointerdown', finish);
     return () => {
-      window.clearTimeout(t);
-      window.removeEventListener('keydown', onDismiss);
-      window.removeEventListener('pointerdown', onDismiss);
+      window.clearTimeout(capTimer);
+      window.clearTimeout(minTimer);
+      document.removeEventListener('DOMContentLoaded', onLoad);
+      window.removeEventListener('keydown', finish);
+      window.removeEventListener('pointerdown', finish);
     };
   }, []);
 

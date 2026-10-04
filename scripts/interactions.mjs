@@ -180,6 +180,29 @@ const hazardous = await p.evaluate(() => {
 check('No position:fixed element sits under a backdrop-filter/filter/perspective ancestor', hazardous.length === 0, hazardous.join(', '));
 await p.close();
 
+// --- Reflow: WCAG 1.4.10 requires content to reflow without horizontal
+// scrolling at 320 CSS px (the equivalent of 400% zoom on a 1280 screen). ---
+p = await b.newPage();
+await p.setViewport({ width: 320, height: 640 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 1500));
+const reflowOverflow = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+check('Home page reflows at 320px with no horizontal scroll', reflowOverflow <= 0, `${reflowOverflow}px overflow`);
+await p.close();
+
+// --- Closing line and invite link in the footer: the brief's final CTA. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 1500));
+const footerCta = await p.evaluate(() => {
+  const footer = document.querySelector('footer');
+  const invite = [...(footer?.querySelectorAll('a') ?? [])].find((a) => a.textContent?.includes('Invite Bhavana'));
+  return { hasLine: !!footer?.textContent?.includes('Build something intelligent.'), inviteHref: invite?.getAttribute('href') ?? null };
+});
+check('Footer closes with "Build something intelligent." and an Invite Bhavana link to #contact', footerCta.hasLine && footerCta.inviteHref === '/#contact', JSON.stringify(footerCta));
+await p.close();
+
 // --- Nav labels must never wrap at the narrowest desktop-nav width (1024):
 // "04 AI LAB" previously broke onto two lines, which reads as a layout bug. ---
 p = await b.newPage();

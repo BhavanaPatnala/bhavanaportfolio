@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "build:qa": "cross-env BUILD_TARGET=qa next build",
     "start:qa": "cross-env BUILD_TARGET=qa next start -p 3100",
@@ -22,6 +22,7 @@
     "three": "^0.186.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@types/node": "^26.6.2",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
@@ -29,6 +30,8 @@
     "autoprefixer": "^10.6.1",
     "axe-core": "^4.13.0",
     "cross-env": "^10.1.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.27",
     "lighthouse": "^13.5.0",
     "postcss": "^8.5.28",
     "puppeteer-core": "^25.11.0",

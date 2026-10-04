@@ -9,6 +9,16 @@ export default function SiteFooter() {
   return (
     <footer className="border-t border-glass-border bg-void-sunken">
       <div className="shell py-12">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-4 pb-12">
+          <p className="text-d3 text-bone">Build something intelligent.</p>
+          <Link
+            href="/#contact"
+            data-cursor="link"
+            className="tap link-underline font-mono text-micro uppercase tracking-[0.14em] text-signature hover:text-bone"
+          >
+            Invite Bhavana →
+          </Link>
+        </div>
         <div className="grid gap-y-10 md:grid-cols-12 md:gap-x-8">
           <div className="md:col-span-4">
             <p className="font-mono text-meta uppercase tracking-[0.18em] text-bone">Bhavana&nbsp;P</p>

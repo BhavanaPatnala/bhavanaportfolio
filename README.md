@@ -774,3 +774,46 @@ Limitation: these fixes were judged by screenshot, not by a scripted
 overlap detector, so a future regression would only be caught by looking.
 52/52 interaction checks, 0/5 accessibility violations, clean typecheck
 and QA build.
+
+## Privacy: what this site collects
+
+Checked against the code, not assumed:
+
+- **No analytics, trackers or cookies.** No analytics package is in
+  `package.json`, and nothing sets a cookie.
+- **No browser storage.** A codebase search finds no `localStorage`,
+  `sessionStorage` or query-string reading.
+- **No forms, no third-party scripts, no third-party fonts.** Fonts are
+  self-hosted; the CSP restricts every other origin.
+- **External links are user-initiated.** GitHub, LinkedIn, the live demos and
+  the certificate verification pages open only when a visitor clicks them.
+- **The GitHub build log is fetched by the server.** The browser never calls
+  GitHub, so a visitor's address is not sent there.
+
+What does exist is the hosting platform's own infrastructure logging (Vercel
+records request metadata such as IP address under its own policy). This site
+adds nothing on top of that.
+
+## Lint and the remaining brief items
+
+Lint is now a standing gate. `npm run lint` runs ESLint with Next's core-web-vitals
+and TypeScript rules; it reports 0 errors and 0 warnings. The deprecated
+`next lint` command was replaced.
+
+Verified this round: reflow at 320 CSS px with no horizontal scroll on every
+route; forced-colours mode active with text, nav and focus outlines legible;
+1280 reviewed for all five 3D sections (AI Lab's signal-graph nodes were
+crossing the lede and were dimmed); preloader release measured at about 2.2s,
+down from roughly 2.7s by constants, now released at DOMContentLoaded
+rather than a fixed hold; closing line and Invite Bhavana link in the footer.
+
+Still not done, deliberately. Evaluator's Desk, Speaking & Community and the
+Engineering Intelligence Model need your real content. The indigo palette and
+the AI Debate System were declined. The navigation rename depends on the
+sections above. The 3D photo gallery, the 3D certificate archive, the
+AI Violation visual language, the PerfOS repository lab and per-project AI Lab
+environments are large creative builds. They are not claimed as complete, and
+each needs review before shipping. Hero pointer and scroll reaction is unverified.
+
+54/54 interaction checks, 0/5 accessibility violations, zero lint errors and
+warnings, clean typecheck and QA build.

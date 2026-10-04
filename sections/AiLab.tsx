@@ -26,7 +26,7 @@ export default function AiLab() {
         className="pointer-events-none absolute inset-0 -z-[5]"
         style={{
           background:
-            'linear-gradient(90deg, rgba(13,12,11,0.92) 0%, rgba(13,12,11,0.72) 45%, transparent 75%), linear-gradient(180deg, rgba(13,12,11,0.7) 0%, transparent 18%, transparent 82%, rgba(13,12,11,0.7) 100%)',
+            'linear-gradient(90deg, rgba(13,12,11,0.92) 0%, rgba(13,12,11,0.88) 60%, rgba(13,12,11,0.55) 74%, transparent 92%), linear-gradient(180deg, rgba(13,12,11,0.7) 0%, transparent 18%, transparent 82%, rgba(13,12,11,0.7) 100%)',
         }}
       />
 

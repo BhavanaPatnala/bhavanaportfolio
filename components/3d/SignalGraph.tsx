@@ -33,7 +33,6 @@ export default function SignalGraph({ tier }: { tier: DeviceTier }) {
       arr[i * 3 + 2] = Math.sin(angle * 2) * 0.35;
     }
     return arr;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
   const nodeGeo = useDisposable(() => new THREE.IcosahedronGeometry(0.055, 1), []);
