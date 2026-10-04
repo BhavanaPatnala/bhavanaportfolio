@@ -84,7 +84,7 @@ export default function SiteNav() {
                 <Link
                   href={item.href}
                   data-cursor="link"
-                  className="tap group flex items-baseline gap-1.5 font-mono text-micro uppercase tracking-[0.14em] text-bone-3 transition-colors hover:text-bone"
+                  className="tap group flex items-baseline gap-1.5 whitespace-nowrap font-mono text-micro uppercase tracking-[0.14em] text-bone-3 transition-colors hover:text-bone"
                 >
                   <span className="text-bone-3 transition-colors group-hover:text-signature">{item.n}</span>
                   {item.label}

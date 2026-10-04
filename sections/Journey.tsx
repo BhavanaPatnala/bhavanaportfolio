@@ -43,7 +43,19 @@ export default function Journey() {
             className="pointer-events-none absolute inset-0 -z-[5]"
             style={{
               background:
-                'linear-gradient(180deg, rgba(13,12,11,0.35) 0%, transparent 30%, transparent 62%, rgba(13,12,11,0.9) 100%), linear-gradient(90deg, rgba(13,12,11,0.55) 0%, transparent 50%, rgba(13,12,11,0.55) 100%)',
+                'linear-gradient(180deg, rgba(13,12,11,0.35) 0%, transparent 30%, transparent 62%, rgba(13,12,11,0.9) 100%), linear-gradient(90deg, rgba(13,12,11,0.92) 0%, rgba(13,12,11,0.78) 40%, transparent 68%, rgba(13,12,11,0.55) 100%)',
+            }}
+          />
+          {/* On narrow screens the text column spans the full width, so the
+              side darkening leaves the right-hand wire crossing body copy.
+              A mid-band darkening, mobile only, keeps the scene as atmosphere
+              behind the text across the whole width. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-[5] md:hidden"
+            style={{
+              background:
+                'linear-gradient(180deg, transparent 22%, rgba(13,12,11,0.78) 42%, rgba(13,12,11,0.78) 72%, transparent 88%)',
             }}
           />
 

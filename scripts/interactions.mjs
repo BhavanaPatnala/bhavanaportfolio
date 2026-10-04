@@ -148,6 +148,50 @@ check(
 );
 await p.close();
 
+// --- Containing-block guard, class-level not instance-level: no
+// position:fixed element anywhere on the page may have a backdrop-filter,
+// filter or perspective ancestor, since any of those silently re-anchors
+// "fixed to viewport" to that ancestor instead — the exact mechanism behind
+// the command palette bug. Checked after scrolling into Recognition so the
+// condensed nav and the Lightbox wrapper are both in the tree. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2000));
+const recTop = await p.evaluate(() => document.getElementById('recognition')?.getBoundingClientRect().top ?? 0);
+await p.evaluate((y) => window.scrollBy(0, y - 80), recTop);
+await new Promise((r) => setTimeout(r, 700));
+const hazardous = await p.evaluate(() => {
+  const bad = [];
+  document.querySelectorAll('body *').forEach((el) => {
+    if (getComputedStyle(el).position !== 'fixed') return;
+    let a = el.parentElement;
+    while (a && a !== document.body) {
+      const cs = getComputedStyle(a);
+      if (cs.backdropFilter !== 'none' || cs.filter !== 'none' || cs.perspective !== 'none') {
+        bad.push(el.tagName + ' under ' + a.tagName);
+        break;
+      }
+      a = a.parentElement;
+    }
+  });
+  return bad;
+});
+check('No position:fixed element sits under a backdrop-filter/filter/perspective ancestor', hazardous.length === 0, hazardous.join(', '));
+await p.close();
+
+// --- Nav labels must never wrap at the narrowest desktop-nav width (1024):
+// "04 AI LAB" previously broke onto two lines, which reads as a layout bug. ---
+p = await b.newPage();
+await p.setViewport({ width: 1024, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 1200));
+const navLinkHeights = await p.evaluate(() =>
+  [...document.querySelectorAll('nav[aria-label="Primary"] ul a')].map((a) => Math.round(a.getBoundingClientRect().height)),
+);
+check('Primary nav labels stay on one line at 1024px', navLinkHeights.length > 0 && Math.max(...navLinkHeights) <= 16, `max height ${Math.max(...navLinkHeights)}px`);
+await p.close();
+
 // --- Reduced motion: no WebGL chunk requested, no canvas, content visible ---
 p = await b.newPage();
 const rmRequests = [];

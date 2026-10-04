@@ -710,3 +710,43 @@ scrolling to Contact and opening the palette from there is now a
 standing part of the suite, not just the unscrolled case. 50/50
 interaction checks, 0/5 accessibility violations, clean typecheck and
 build.
+
+## A sweep, reported honestly — and three real visual defects it led to
+
+Asked to run a broad, multi-agent hunt for more instances of the
+command-palette bug class, the sweep was only partly run: three of four
+sub-agents hit the session usage limit before reporting, and the one
+that finished returned an empty result. That is not evidence the site is
+clean, so this round did the checks directly and sequentially instead,
+and reports only what was measured.
+
+Measured, no defects: horizontal overflow across 9 viewport widths
+(375–1920) × 5 routes, scrolled through the full page — zero overflow.
+Every position:fixed element on the page, in both the closed and open
+Lightbox states, has zero backdrop-filter / filter / perspective
+ancestors (header, cursor, Lightbox wrapper all anchored to the viewport).
+Tab order across 70 stops is logical, and every focused element has a
+visible outline. Escape closes the Lightbox; five rapid command-palette
+open/close cycles leave zero stray dialogs and restore body scroll.
+
+Found by looking at screenshots, which numeric checks alone missed:
+
+1. **Journey text under 3D wires (all widths).** The left-edge darkening
+   behind the stage text was too weak, so wireframe octahedra and orbit
+   rings ran behind the headline, bullets and tag pills — worst at
+   1440, and crossing body copy at 375 and 768. Fixed at the source by
+   strengthening that existing gradient layer (0.55 → 0.92 at the edge,
+   fading out by 68%), plus a mobile-only mid-band (`md:hidden`) for the
+   full-width text on narrow screens. Verified by re-capturing 375, 768,
+   1024 and 1440 at the same scroll offsets as the flagged captures.
+
+2. **Nav label wrap at 1024.** "04 AI LAB" broke onto two lines. Fixed
+   with `whitespace-nowrap` on the nav links; measured single-line at
+   1024 with no overflow at any width.
+
+A permanent guard now asserts no nav label wraps at 1024, and the
+class-level containing-block audit above is a standing check, so the
+whole class stays covered rather than one instance.
+
+52/52 interaction checks, 0/5 accessibility violations, clean typecheck
+and QA build.
