@@ -10,7 +10,7 @@ const LayerStackCanvas = dynamic(() => import('./LayerStackCanvas'), { ssr: fals
 
 export default function EngineerScene({ className }: { className?: string }) {
   const { tier, showCanvas, reportContextLost } = use3DReadiness();
-  const { ref, inView } = useInView<HTMLDivElement>();
+  const { ref, inView, hasBeenInView } = useInView<HTMLDivElement>();
 
   return (
     <div ref={ref} className={cn('absolute inset-0 h-full w-full overflow-hidden', className)}>
@@ -20,7 +20,7 @@ export default function EngineerScene({ className }: { className?: string }) {
           showCanvas ? 'opacity-0' : 'opacity-100',
         )}
       />
-      {showCanvas && tier && (
+      {showCanvas && tier && hasBeenInView && (
         <LayerStackCanvas tier={tier} frameloop={inView ? 'always' : 'never'} onContextLost={reportContextLost} />
       )}
     </div>

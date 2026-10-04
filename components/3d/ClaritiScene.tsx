@@ -17,7 +17,7 @@ export default function ClaritiScene({
   progress: RefObject<number>;
 }) {
   const { tier, showCanvas, reportContextLost } = use3DReadiness();
-  const { ref, inView } = useInView<HTMLDivElement>();
+  const { ref, inView, hasBeenInView } = useInView<HTMLDivElement>();
 
   return (
     <div ref={ref} className={cn('absolute inset-0 h-full w-full overflow-hidden', className)}>
@@ -27,7 +27,7 @@ export default function ClaritiScene({
           showCanvas ? 'opacity-0' : 'opacity-100',
         )}
       />
-      {showCanvas && tier && (
+      {showCanvas && tier && hasBeenInView && (
         <ClaritiCanvas
           tier={tier}
           progress={progress}

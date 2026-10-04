@@ -584,3 +584,55 @@ and readable — nav present, main content intact — after every single
 context was lost. Two new permanent regression checks assert exactly
 that. 47/47 interaction checks, 0/5 accessibility violations, clean
 typecheck and build.
+
+## Deferring 3D mount to where it's actually needed — and a reverted attempt first
+
+Seventh staged piece. Profiling *why* Lighthouse's performance score was
+mediocre (rather than just citing the noisy number) found a real,
+specific cause: `mainthread-work-breakdown` showed ~6s of contiguous
+"Script Evaluation," and `bootup-time` traced most of it to one chunk.
+The reason: every one of the 6 WebGL scenes mounts during idle time
+*regardless of scroll position* — a deliberate earlier design choice
+(see the comment this session added to `useInView`'s predecessor) meant
+to avoid visible WebGL init lag when scrolling into a new section. The
+trade-off nobody had measured: a visitor who never scrolls past the
+hero still pays the mounting cost of all 6.
+
+First attempt — staggering each scene's idle *request* by 150ms so six
+simultaneous inits didn't land in one contiguous burst — was built,
+measured with three Lighthouse runs, and made things clearly worse (43,
+52, 48 vs. a 54/58/63 baseline; TBT up to 7.6s; CLS went non-zero on one
+run). Reverted immediately via `git restore`, not patched around — Total
+Blocking Time counts total blocked time across the whole loading window,
+not peak burst size, so spreading the same total work over more
+wall-clock time made the page "busy" for longer without reducing the
+sum. A plausible hypothesis that measurement disproved, kept out of the
+shipped code.
+
+The actual fix: don't do the work at all until it's needed. `useInView`
+now also returns `hasBeenInView` — latches `true` the first time the
+section is actually within 400px of the viewport, and never resets.
+Each Scene's Canvas now mounts on `showCanvas && tier && hasBeenInView`
+instead of just `showCanvas && tier`, deferring the *first* mount to
+match scroll position while preserving the original guarantee exactly:
+once a section has been shown, its Canvas never unmounts again, so
+scrolling back up never re-triggers the pop-in the earlier design was
+built to avoid. Verified directly, not assumed: canvas count on initial
+load dropped from 6 to 2 (hero plus whatever else falls inside the
+pre-roll margin), climbed to 6 after scrolling through the full page,
+and stayed at 6 after scrolling back to the top.
+
+Reported honestly rather than oversold: the Lighthouse performance
+score itself didn't clearly improve (55/55/52 vs. the 54/58/63
+baseline) — but Total Blocking Time became markedly more consistent
+(2.98s–3.75s vs. a 1.24s–4.18s swing before) and CLS stayed rock-stable
+at 0.012 across all three runs. Lighthouse's lab trace loads once and
+never scrolls, so it can't fully credit work that's now skipped
+entirely for a visitor who doesn't scroll past the hero — a real
+reduction in actual work done, even where the specific lab metric used
+here doesn't reward it. Kept because the mechanism is sound, directly
+verified, and regression-free — not because of what one noisy number
+said. Full existing suite re-run and unaffected: 47/47 interaction
+checks (including the mobile-tier and WebGL-context-loss guards from
+the two previous stages), 0/5 accessibility violations, clean typecheck
+and build.

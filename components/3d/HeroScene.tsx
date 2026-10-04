@@ -17,7 +17,7 @@ const HeroCanvas = dynamic(() => import('./HeroCanvas'), { ssr: false });
  */
 export default function HeroScene({ className }: { className?: string }) {
   const { tier, showCanvas, reportContextLost } = use3DReadiness();
-  const { ref, inView } = useInView<HTMLDivElement>();
+  const { ref, inView, hasBeenInView } = useInView<HTMLDivElement>();
 
   // Always absolutely positioned, filling its nearest positioned ancestor —
   // this component has exactly one use (a full-bleed backdrop), so its own
@@ -31,7 +31,7 @@ export default function HeroScene({ className }: { className?: string }) {
           showCanvas ? 'opacity-0' : 'opacity-100',
         )}
       />
-      {showCanvas && tier && (
+      {showCanvas && tier && hasBeenInView && (
         <HeroCanvas tier={tier} frameloop={inView ? 'always' : 'never'} onContextLost={reportContextLost} />
       )}
     </div>
