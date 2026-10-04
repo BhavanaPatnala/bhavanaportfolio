@@ -180,6 +180,47 @@ const hazardous = await p.evaluate(() => {
 check('No position:fixed element sits under a backdrop-filter/filter/perspective ancestor', hazardous.length === 0, hazardous.join(', '));
 await p.close();
 
+// --- Certificate archive: hover lifts the sheet in real 3D depth for a
+// mouse, reduced motion keeps the tile still, and the Lightbox still opens
+// on click and closes on Escape. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2500));
+await p.evaluate(() => document.querySelector('button[aria-label^="View "]').scrollIntoView({ block: 'center' }));
+await new Promise((r) => setTimeout(r, 1600));
+const certBox = await p.evaluate(() => {
+  const r = document.querySelector('button[aria-label^="View "]').getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+});
+await p.mouse.move(certBox.x, certBox.y, { steps: 8 });
+await new Promise((r) => setTimeout(r, 900));
+const liftTransform = await p.evaluate(() => getComputedStyle(document.querySelector('button[aria-label^="View "]')).transform);
+check('Certificate sheet lifts in 3D depth on mouse hover', liftTransform.startsWith('matrix3d') && liftTransform !== 'none', liftTransform.slice(0, 40));
+await p.evaluate(() => document.querySelector('button[aria-label^="View "]').click());
+await new Promise((r) => setTimeout(r, 500));
+check('Certificate tile still opens the Lightbox on click', await p.evaluate(() => !!document.querySelector('[role="dialog"]')));
+await p.keyboard.press('Escape');
+await new Promise((r) => setTimeout(r, 400));
+check('Escape closes the certificate Lightbox', await p.evaluate(() => !document.querySelector('[role="dialog"]')));
+await p.close();
+
+p = await b.newPage();
+await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2000));
+await p.evaluate(() => document.querySelector('button[aria-label^="View "]').scrollIntoView({ block: 'center' }));
+await new Promise((r) => setTimeout(r, 1600));
+const rmBox = await p.evaluate(() => {
+  const r = document.querySelector('button[aria-label^="View "]').getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+});
+await p.mouse.move(rmBox.x, rmBox.y, { steps: 6 });
+await new Promise((r) => setTimeout(r, 900));
+check('Reduced motion keeps certificate sheets still on hover', await p.evaluate(() => getComputedStyle(document.querySelector('button[aria-label^="View "]')).transform === 'none'));
+await p.close();
+
 // --- Reflow: WCAG 1.4.10 requires content to reflow without horizontal
 // scrolling at 320 CSS px (the equivalent of 400% zoom on a 1280 screen). ---
 p = await b.newPage();

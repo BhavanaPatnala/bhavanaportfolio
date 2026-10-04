@@ -2,20 +2,23 @@
 
 import { useRef, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { useReducedMotion } from '@/lib/useMedia';
 
 /**
  * A card with real physical depth on hover — perspective tilt tracking the
  * pointer, plus a light highlight that moves with it, rather than the
- * generic uniform-lift-and-shadow every card everywhere uses. Desktop
- * (fine pointer) only; touch devices get the flat card, no half-tilted
- * state stuck mid-gesture.
+ * generic uniform-lift-and-shadow every card everywhere uses. Only mouse
+ * pointers tilt: touch and pen get the flat card, so nothing sticks mid-tilt
+ * after a tap. Reduced motion gets no tilt at all.
  */
 export default function TiltCard({ children, className }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const glareRef = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
+  const reduceMotion = useReducedMotion();
 
-  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse') return;
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -33,18 +36,22 @@ export default function TiltCard({ children, className }: { children: ReactNode;
     });
   };
 
-  const onMouseLeave = () => {
+  const onPointerLeave = () => {
     const el = ref.current;
     if (!el) return;
     el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)';
     if (glareRef.current) glareRef.current.style.background = 'transparent';
   };
 
+  if (reduceMotion) {
+    return <div className={cn('relative', className)}>{children}</div>;
+  }
+
   return (
     <div
       ref={ref}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
       className={cn('relative transition-transform duration-300 ease-out will-change-transform', className)}
       style={{ transformStyle: 'preserve-3d' }}
     >

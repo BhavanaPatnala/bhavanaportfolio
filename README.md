@@ -817,3 +817,31 @@ each needs review before shipping. Hero pointer and scroll reaction is unverifie
 
 54/54 interaction checks, 0/5 accessibility violations, zero lint errors and
 warnings, clean typecheck and QA build.
+
+## The certificate archive, as physical sheets
+
+The certificates are now physical sheets: a solid card with two sheets
+stacked behind it in real 3D depth, a shadow that deepens as the sheet lifts,
+and the same pointer tilt and light as the project cards. Keyboard focus lifts
+the sheet the same way hover does. The Lightbox, the document content and the
+Escape behaviour are unchanged.
+
+The depth is CSS 3D (`perspective` and `translateZ`), not WebGL. A WebGL
+plane per certificate would add GPU contexts to a page that already runs six,
+and the brief asks to avoid that. CSS 3D gives the same physical read with no
+extra context. The archive is still a grid, so it stays fully keyboard and
+screen-reader friendly.
+
+Two defects in the shared tilt component were fixed along the way.
+`TiltCard` said it respected reduced motion and touch, but it did neither: it
+tilted on any pointer event, touch included, and ignored reduced motion. It now
+tilts only for a mouse and drops all movement under reduced motion. The project
+cards benefit too.
+
+Verified: the hover lift computes to a real 3D transform; reduced motion leaves
+the sheet still; the Lightbox opens on click and closes on Escape; no horizontal
+overflow at 320 or 390 CSS px, even with the stacked sheets offset outside each
+tile. Judged by a desktop screenshot, not by a scripted depth test.
+
+58/58 interaction checks, 0/5 accessibility violations, zero lint errors and
+warnings, clean typecheck and QA build.
