@@ -636,3 +636,33 @@ said. Full existing suite re-run and unaffected: 47/47 interaction
 checks (including the mobile-tier and WebGL-context-loss guards from
 the two previous stages), 0/5 accessibility violations, clean typecheck
 and build.
+
+## Invite Bhavana
+
+Eighth staged piece — the one remaining item from the brief answerable
+without new facts. "Invite Bhavana" is listed there as strategically
+important, with example reasons (tech talks, panel discussions,
+hackathon jury, technical evaluation, mentoring, AI product discussions,
+engineering workshops). Three of those seven already have direct
+evidence elsewhere on the site (jury/evaluation/mentoring, documented in
+Recognition); the other four don't — no talk or panel appearance is
+recorded anywhere here.
+
+Resolved by keeping the list forward-looking rather than backdated: an
+invitation reason doesn't assert a prior occurrence, it states what
+someone could ask for — "invite Bhavana for tech talks" claims nothing
+about a tech talk ever having happened, the same way a restaurant
+listing "private events" doesn't claim one happened last week. All
+seven reasons are listed together, undifferentiated, because the
+distinction that matters (has this happened vs. is this being offered)
+is already preserved correctly: Recognition states only completed work,
+this new list in Contact states only availability. Neither contradicts
+the other.
+
+Added as a labelled pill list ("Invite Bhavana for") inside the existing
+Contact section, matching the tag styling already used in Engineer and
+About rather than introducing a new visual pattern — no new section, no
+nav change, no IA restructuring for a part of the brief that doesn't yet
+have enough real content (Speaking & Community) to justify one. 47/47
+interaction checks, 0/5 accessibility violations, clean typecheck and
+build.

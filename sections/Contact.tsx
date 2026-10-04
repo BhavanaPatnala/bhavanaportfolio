@@ -6,6 +6,24 @@ const channels = [
   { label: 'GitHub', value: 'BhavanaPatnala', href: site.links.github, external: true },
 ] as const;
 
+/**
+ * Forward-looking invitation categories, not a record of past events —
+ * deliberately distinct from Recognition, which only ever states what has
+ * actually happened. Jury/evaluation/mentoring are listed here too because
+ * being invited again for something already done is exactly as honest as
+ * being invited for the first time; none of these claim a prior occurrence
+ * that isn't true.
+ */
+const inviteReasons = [
+  'Hackathon jury',
+  'Technical evaluation',
+  'Mentoring',
+  'Tech talks',
+  'Panel discussions',
+  'AI product discussions',
+  'Engineering workshops',
+] as const;
+
 export default function Contact() {
   return (
     <section id="contact" className="relative border-t border-glass-border bg-void-raised py-section">
@@ -22,6 +40,20 @@ export default function Contact() {
           Open to conversations about frontend architecture, performance work, AI-assisted
           tooling and principal engineering roles.
         </p>
+
+        <div className="reveal mt-10" style={{ transitionDelay: '120ms' }}>
+          <p className="label text-bone-4">Invite Bhavana for</p>
+          <ul className="mt-4 flex flex-wrap gap-2.5">
+            {inviteReasons.map((reason) => (
+              <li
+                key={reason}
+                className="glass rounded-full px-4 py-2 font-mono text-micro uppercase tracking-[0.12em] text-bone-2"
+              >
+                {reason}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <ul className="mt-14 md:mt-16">
           {channels.map((channel, i) => (
