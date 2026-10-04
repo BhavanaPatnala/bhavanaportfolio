@@ -666,3 +666,47 @@ nav change, no IA restructuring for a part of the brief that doesn't yet
 have enough real content (Speaking & Community) to justify one. 47/47
 interaction checks, 0/5 accessibility violations, clean typecheck and
 build.
+
+## A real, user-reported bug: the command palette scrambled itself once scrolled
+
+Reported directly, with a screenshot, from the live site: opening the
+command palette after scrolling down to Contact rendered it in the
+wrong place, overlapping and bleeding through the page content beneath
+it — the Contact section's large email/LinkedIn text and the command
+palette's own list items were visibly superimposed on each other.
+
+Root cause: the trigger button lives inside `SiteNav`, and once the
+page is scrolled past 24px the nav condenses and picks up a `.glass`
+class — `backdrop-filter`. Any `backdrop-filter`, `transform`, `filter`
+or `perspective` on an ancestor creates a new containing block for
+`position: fixed` descendants (a genuinely easy-to-miss CSS behaviour).
+The palette's dialog was declared `fixed inset-0`, meant to fill the
+real viewport, but because it rendered as a DOM descendant of that now-
+`backdrop-filter`'d nav pill, "fixed" actually resolved relative to that
+small pill instead — landing wherever the page happened to be scrolled
+to rather than the viewport's top, with nothing solid behind it to
+block the page content showing through.
+
+This reproduces *only* once the nav is condensed, which is exactly why
+it shipped undetected: both existing command-palette checks opened the
+palette immediately after navigation, before any scrolling, when
+`.glass`/`backdrop-filter` isn't applied yet. A real coverage gap, not
+just a code bug.
+
+Fixed at the architectural level a modal should already be built at:
+the dialog now renders through `createPortal(..., document.body)`
+instead of inline where the trigger sits, so no ancestor's CSS can ever
+affect its positioning again, regardless of what SiteNav does in the
+future. Verified by reproducing the exact scenario — scroll to Contact,
+confirm the nav is genuinely condensed, open the palette, and check
+both that the dialog is now a direct child of `<body>` (not inside
+`<header>`) and that its computed top is `0`, i.e. actually fixed to
+the viewport. Confirmed visually too: a screenshot of the same scrolled
+state now shows a clean, correctly-positioned, fully opaque dialog with
+no bleed-through.
+
+Three new permanent checks close the coverage gap this bug exposed —
+scrolling to Contact and opening the palette from there is now a
+standing part of the suite, not just the unscrolled case. 50/50
+interaction checks, 0/5 accessibility violations, clean typecheck and
+build.

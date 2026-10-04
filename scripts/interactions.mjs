@@ -105,6 +105,49 @@ await new Promise((r) => setTimeout(r, 600));
 check('Selecting a case study from the command palette navigates there', p.url().includes('/work/perf-os'), p.url());
 await p.close();
 
+// --- Command palette after scrolling: a real, user-reported bug. The
+// trigger lives inside SiteNav's condensed-state pill, which gets a
+// `.glass` class (backdrop-filter) once scrolled past 24px. Any
+// backdrop-filter/transform/filter on an ancestor creates a new containing
+// block for position:fixed descendants, so the palette's "fixed to the
+// viewport" dialog was actually fixed to that small nav pill instead —
+// rendering at the wrong position and bleeding through page content
+// beneath it. Only reproduces once condensed, which is exactly why the
+// two checks above (opened immediately after navigation) never caught it. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2200));
+const contactTop = await p.evaluate(() => document.getElementById('contact')?.getBoundingClientRect().top ?? 0);
+await p.evaluate((y) => window.scrollBy(0, y - 80), contactTop);
+await new Promise((r) => setTimeout(r, 500));
+const isCondensed = await p.evaluate(() => document.querySelector('header')?.className.includes('py-3'));
+check('Nav is condensed (the precondition this check needs) after scrolling to Contact', !!isCondensed);
+await p.keyboard.down('Control');
+await p.keyboard.press('k');
+await p.keyboard.up('Control');
+await new Promise((r) => setTimeout(r, 400));
+const palettePosition = await p.evaluate(() => {
+  const dialog = document.querySelector('[role="dialog"][aria-label="Command palette"]');
+  const header = document.querySelector('header');
+  return {
+    isDirectBodyChild: dialog?.parentElement === document.body,
+    isInsideHeader: header?.contains(dialog ?? null) ?? false,
+    top: dialog?.getBoundingClientRect().top,
+  };
+});
+check(
+  'Command palette portals to <body>, not inside the condensed nav pill',
+  palettePosition.isDirectBodyChild && !palettePosition.isInsideHeader,
+  JSON.stringify(palettePosition),
+);
+check(
+  'Command palette is actually fixed to the real viewport top when scrolled',
+  palettePosition.top !== undefined && palettePosition.top < 5,
+  String(palettePosition.top),
+);
+await p.close();
+
 // --- Reduced motion: no WebGL chunk requested, no canvas, content visible ---
 p = await b.newPage();
 const rmRequests = [];

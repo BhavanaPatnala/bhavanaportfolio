@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { nav, site } from '@/data/site';
 import { projects } from '@/data/projects';
@@ -50,6 +51,19 @@ const itemClass =
  * how SiteNav's own mobile-menu panel is already built — proven, already
  * accessible, and it reuses Next's built-in same-page hash scrolling
  * instead of reimplementing it.
+ *
+ * The modal itself is portaled to `document.body` rather than rendered
+ * inline where the trigger button lives — a real, user-reported bug: the
+ * trigger sits inside SiteNav's condensed-state pill, which gets a `.glass`
+ * class (`backdrop-filter`) once the page is scrolled. Any `backdrop-filter`
+ * (or `transform`/`filter`/`perspective`) on an ancestor creates a new
+ * containing block for `position: fixed` descendants, so the "fixed to the
+ * viewport" dialog was actually fixed to that small nav pill instead —
+ * rendering wherever the page happened to be scrolled to, bleeding through
+ * whatever content sat behind it. Reproduces only once `condensed` is true
+ * (scrolled past 24px), which is exactly why the original tests — which
+ * all opened the palette immediately after navigation, before scrolling —
+ * never caught it.
  */
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -112,19 +126,20 @@ export default function CommandPalette() {
         </span>
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Command palette"
-          className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[14vh]"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              close();
-            }
-          }}
-        >
+      {open &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
+            className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[14vh]"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                close();
+              }
+            }}
+          >
           <div aria-hidden className="absolute inset-0 bg-void/80 backdrop-blur-sm" onClick={close} />
 
           <div data-command-panel className="glass-strong relative w-full max-w-[560px] overflow-hidden rounded-2xl shadow-2xl">
@@ -222,8 +237,9 @@ export default function CommandPalette() {
               to { opacity: 1; transform: none; }
             }
           `}</style>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
