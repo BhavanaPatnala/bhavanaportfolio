@@ -22,6 +22,11 @@ export default function Engineer() {
             'linear-gradient(90deg, rgba(13,12,11,0.92) 0%, rgba(13,12,11,0.75) 42%, transparent 72%), linear-gradient(180deg, rgba(13,12,11,0.7) 0%, transparent 18%, transparent 82%, rgba(13,12,11,0.7) 100%)',
         }}
       />
+      {/* On narrow screens the copy spans the full width, so the panel
+          outlines on the right run through paragraph text. A uniform mobile
+          dimming keeps the layers as atmosphere; desktop keeps the side
+          gradient above, which already clears the text column there. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[5] bg-void/60 md:hidden" />
 
       <div className="shell">
         <p className="eyebrow reveal">

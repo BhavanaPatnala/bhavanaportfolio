@@ -750,3 +750,27 @@ whole class stays covered rather than one instance.
 
 52/52 interaction checks, 0/5 accessibility violations, clean typecheck
 and QA build.
+
+## Visual pass across the 3D sections
+
+Checked every 3D section at 390, 1280 and 1440 by screenshot. Three had
+layered 3D geometry crossing body copy, which numeric checks cannot see:
+
+- **Engineer (mobile).** The panel outlines ran through full-width
+  paragraphs. Added a mobile-only uniform dimming layer (`md:hidden`);
+  desktop keeps its side gradient, which already clears the text column.
+- **Clariti (mobile).** The same defect and the same mobile-only fix.
+- **Clariti (desktop).** The layer frames sit in the middle of the
+  viewport and the lede ran straight through them. Added a desktop band
+  behind just the copy rows, with a mask that fades its top and bottom so
+  no hard seam crosses the frames. Frames stay visible above and below.
+
+Two items were checked and deliberately not changed. Preloader text seen
+in one capture is a timing artifact: the preloader holds 1.8s and fades
+over 500ms, and the capture landed mid-fade on a slow headless run. Hero,
+Recognition and AI Lab showed no wire-over-text overlap at these widths.
+
+Limitation: these fixes were judged by screenshot, not by a scripted
+overlap detector, so a future regression would only be caught by looking.
+52/52 interaction checks, 0/5 accessibility violations, clean typecheck
+and QA build.

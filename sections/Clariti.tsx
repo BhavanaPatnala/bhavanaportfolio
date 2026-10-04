@@ -48,6 +48,23 @@ export default function Clariti() {
               'linear-gradient(90deg, rgba(13,12,11,0.9) 0%, rgba(13,12,11,0.55) 46%, transparent 72%), linear-gradient(180deg, rgba(13,12,11,0.7) 0%, transparent 20%, transparent 80%, rgba(13,12,11,0.85) 100%)',
           }}
         />
+        {/* Narrow screens: the copy spans the full width, so the separating
+            layers would cross it. Mobile-only uniform dimming keeps the layers
+            as atmosphere behind the text; desktop keeps the side gradient. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-[5] bg-void/60 md:hidden" />
+        {/* Desktop: the layer frames sit in the middle of the viewport and the
+            lede runs straight through them. A darkened band over just the copy
+            rows keeps the frames visible above and below the text. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-[38%] bottom-[28%] -z-[5] hidden md:block"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(13,12,11,0.85) 0%, rgba(13,12,11,0.78) 60%, transparent 88%)',
+            maskImage: 'linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%)',
+          }}
+        />
 
         <div className="shell flex flex-1 flex-col justify-center py-section">
           <p className="eyebrow">
