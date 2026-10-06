@@ -86,7 +86,6 @@ export default function SiteNav() {
                   data-cursor="link"
                   className="tap group flex items-baseline gap-1.5 whitespace-nowrap font-mono text-micro uppercase tracking-[0.14em] text-bone-3 transition-colors hover:text-bone"
                 >
-                  <span className="text-bone-3 transition-colors group-hover:text-signature">{item.n}</span>
                   {item.label}
                 </Link>
               </li>
@@ -149,7 +148,6 @@ export default function SiteNav() {
                 className="flex items-baseline justify-between py-4 text-h2 text-bone"
               >
                 {item.label}
-                <span className="font-mono text-micro text-bone-3">{item.n}</span>
               </Link>
             </li>
           ))}

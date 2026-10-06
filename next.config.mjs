@@ -73,7 +73,13 @@ const nextConfig = {
     optimizePackageImports: ['three', '@react-three/drei'],
   },
   async headers() {
-    return [{ source: '/(.*)', headers: securityHeaders }];
+    return [
+      { source: '/(.*)', headers: securityHeaders },
+      {
+        source: '/bhavana-p-resume.pdf',
+        headers: [{ key: 'Content-Disposition', value: 'attachment; filename="Bhavana-P-Resume.pdf"' }],
+      },
+    ];
   },
 };
 

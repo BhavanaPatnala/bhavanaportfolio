@@ -266,6 +266,25 @@ const activeYear = await p.evaluate(() => document.querySelector('#experience bu
 check('Clicking 2019 on the career timeline lands on the 2019 stage', clicked && activeYear === '2019', `active: ${activeYear}`);
 await p.close();
 
+// --- Résumé download: the page's Download PDF control points at the real PDF,
+// and the PDF is served as an attachment with the correct type. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/resume', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 1200));
+const dl = await p.evaluate(() => {
+  const a = [...document.querySelectorAll('a')].find((el) => el.textContent?.includes('Download PDF'));
+  return { href: a?.getAttribute('href') ?? null, download: a?.hasAttribute('download') ?? false };
+});
+check('Résumé page offers a Download PDF link to the PDF file', dl.href === '/bhavana-p-resume.pdf' && dl.download, JSON.stringify(dl));
+await p.close();
+const pdfRes = await fetch(BASE + '/bhavana-p-resume.pdf');
+check(
+  'Résumé PDF is served as an attachment of type application/pdf',
+  pdfRes.ok && (pdfRes.headers.get('content-type') ?? '').includes('application/pdf') && (pdfRes.headers.get('content-disposition') ?? '').startsWith('attachment'),
+  `${pdfRes.status} ${pdfRes.headers.get('content-type')}`,
+);
+
 // --- Reflow: WCAG 1.4.10 requires content to reflow without horizontal
 // scrolling at 320 CSS px (the equivalent of 400% zoom on a 1280 screen). ---
 p = await b.newPage();

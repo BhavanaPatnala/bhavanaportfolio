@@ -79,8 +79,7 @@ export default function Contact() {
         </ul>
 
         <p className="reveal mt-10 max-w-prose text-small text-bone-4">
-          Based in {site.location}. Phone number and address are on the résumé rather than on the
-          open web.
+          Based in {site.location}.
         </p>
       </div>
     </section>

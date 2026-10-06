@@ -946,3 +946,21 @@ Two brief items are still not built. A full rewrite of the 3D architecture into
 one scene, and a palette change, were declined. The rest of the brief (a
 Speaking section, the Engineering Intelligence Model, AI Debate) needs real
 content or was declined, and is recorded in the earlier sections.
+
+## Résumé download
+
+The Download PDF control on `/resume` now serves the résumé itself
+(`public/bhavana-p-resume.pdf`), with an attachment header so it downloads
+rather than opening inline. The Print control opens the browser print dialog for
+the page. The earlier Download button was actually print, and it is now labelled
+honestly.
+
+This PDF is public and contains a phone number and a home address. That is the
+owner's deliberate choice, and it means the Contact section no longer says those
+details stay off the open web. That sentence has been removed. Replace the PDF
+file to update the download, and keep it current with the page.
+
+The header navigation labels no longer carry section numbers.
+
+63/63 interaction checks, 0 accessibility violations, zero lint errors and
+warnings, clean typecheck and build.

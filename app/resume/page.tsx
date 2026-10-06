@@ -42,6 +42,17 @@ export default function ResumePage() {
             <p className="mt-3 text-lede text-bone-2">{site.role}</p>
           </div>
           <div className="no-print flex flex-wrap gap-3">
+            <a
+              href="/bhavana-p-resume.pdf"
+              download="Bhavana-P-Resume.pdf"
+              data-cursor="open"
+              className="group inline-flex h-11 items-center gap-2.5 rounded-full bg-bone px-5 font-mono text-micro uppercase tracking-[0.14em] text-void transition-colors duration-300 hover:bg-signature"
+            >
+              Download PDF
+              <span aria-hidden className="transition-transform duration-300 ease-out group-hover:translate-y-0.5">
+                ↓
+              </span>
+            </a>
             <PrintButton />
             <Link
               href="/#work"
