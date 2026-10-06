@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import JourneyScene from '@/components/3d/JourneyScene';
 import { useStickyScrollProgress } from '@/lib/scrollProgress';
+import { useReducedMotion } from '@/lib/useMedia';
 import { roles } from '@/data/experience';
 import { cn } from '@/lib/cn';
 
@@ -18,6 +19,19 @@ export default function Journey() {
   const { ref, progress } = useStickyScrollProgress<HTMLDivElement>();
   const activeStage = useRef(0);
   const [stage, setStage] = useState(0);
+  const reduceMotion = useReducedMotion();
+
+  // Scroll so the pinned story lands inside the chosen stage. Progress is
+  // measured against the pin's own travel, so the target is the pin's top plus
+  // the stage's share of that travel. The small margin keeps the landing inside
+  // the stage rather than on its boundary.
+  const jumpToStage = (index: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const travel = el.offsetHeight - window.innerHeight;
+    const top = el.getBoundingClientRect().top + window.scrollY + (index / 4 + 0.02) * travel;
+    window.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
 
   useEffect(() => {
     let frame = 0;
@@ -93,21 +107,30 @@ export default function Journey() {
                 <div className="md:col-span-5">
                   <ol className="flex items-center gap-3">
                     {chronological.map((r, i) => (
-                      <li key={r.id} className="flex flex-1 flex-col gap-2">
-                        <span
-                          className={cn(
-                            'h-1 rounded-full transition-colors duration-500',
-                            i === stage ? 'bg-signature' : i < stage ? 'bg-bone-3' : 'bg-glass-border',
-                          )}
-                        />
-                        <span
-                          className={cn(
-                            'label transition-colors duration-500',
-                            i === stage ? 'text-bone' : 'text-bone-4',
-                          )}
+                      <li key={r.id} className="flex flex-1">
+                        <button
+                          type="button"
+                          onClick={() => jumpToStage(i)}
+                          aria-current={i === stage ? 'step' : undefined}
+                          aria-label={`Go to ${r.year}: ${r.title}`}
+                          data-cursor="link"
+                          className="tap flex w-full flex-col gap-2 text-left"
                         >
-                          {r.year}
-                        </span>
+                          <span
+                            className={cn(
+                              'h-1 rounded-full transition-colors duration-slow',
+                              i === stage ? 'bg-signature' : i < stage ? 'bg-bone-3' : 'bg-glass-border',
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              'label transition-colors duration-slow',
+                              i === stage ? 'text-bone' : 'text-bone-4',
+                            )}
+                          >
+                            {r.year}
+                          </span>
+                        </button>
                       </li>
                     ))}
                   </ol>

@@ -887,10 +887,11 @@ yet on the scale.
 build, not claims. The Lighthouse performance score is not budgeted, because
 it swings 43–63 on this machine under throttling.
 
-| Budget | Target | Measured on this build |
+| Budget | Ceiling (gzipped JS) | Measured on this build |
 |---|---|---|
-| Home first-load JS (shared + route) | ≤ 130 kB | 123 kB |
-| Case-study first-load JS | ≤ 120 kB | 114–115 kB |
+| Home (shared layout + route) | ≤ 135 KiB | 127.5 KiB |
+| Case studies (PerfOS, Aveniq, CiviqueX) | ≤ 125 KiB | 118.2–118.8 KiB |
+| Resume | ≤ 118 KiB | 111.0 KiB |
 | 3D chunk | loads only near its scene | deferred by readiness and proximity |
 | Web fonts | 2 files | 2 files (Geist sans and mono) |
 | Cumulative Layout Shift | ≤ 0.05 | 0.012 across three runs |
@@ -900,8 +901,16 @@ Largest transferred assets, in order: the 3D chunk (about 100 kB), a second
 3D-related chunk (about 88 kB), the shared client chunk (about 54 kB), the
 application chunk (about 51 kB), then the two font files (about 50 kB and 45 kB).
 
-The budgets are checked by hand against each build's output and Lighthouse
-run. They are not yet enforced in CI.
+The JavaScript ceilings are enforced by `scripts/check-budgets.mjs`, which
+gzips each route's chunks from the build manifest and fails if any route goes
+over its ceiling. The metric is the gzipped JS a visitor downloads to render a
+route, not Next's rounded "First Load JS" column. A GitHub Actions workflow
+(`.github/workflows/ci.yml`) runs typecheck, lint, the production build and this
+check on every push. The workflow was written and the commands it runs were
+verified locally. It has not yet run on GitHub, so treat its first run as the
+real test. Lighthouse runs stay manual, because they are too noisy to gate on.
+CI does not gate on `npm audit`: the two unresolved high-severity chains
+described above would fail it until the major upgrades are done.
 
 **Deliberately not built from this brief**, each with a reason:
 
@@ -919,3 +928,21 @@ run. They are not yet enforced in CI.
 
 60/60 interaction checks, 0/5 accessibility violations, zero lint errors and
 warnings, clean typecheck and QA build.
+
+## Career timeline and build gates
+
+The career timeline's year markers are now buttons. Each one scrolls the pinned
+story to that stage, using the same progress mapping the component already uses,
+and the active stage follows. Reduced motion jumps without the smooth scroll.
+A permanent check clicks 2019 and confirms the active stage becomes 2019. The
+markers look the same as before.
+
+The build gates are an explicit JavaScript budget, enforced by
+`scripts/check-budgets.mjs`, and a CI workflow that runs typecheck, lint, the
+production build and that budget check. The README's budget table lists the
+measured figures and ceilings.
+
+Two brief items are still not built. A full rewrite of the 3D architecture into
+one scene, and a palette change, were declined. The rest of the brief (a
+Speaking section, the Engineering Intelligence Model, AI Debate) needs real
+content or was declined, and is recorded in the earlier sections.

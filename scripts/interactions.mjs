@@ -247,6 +247,25 @@ await new Promise((r) => setTimeout(r, 1200));
 check('Reduced motion leaves evidence cards untransformed', await p.evaluate(() => [...document.querySelectorAll('ul[aria-label="Event evidence"] > li')].every((li) => !li.style.transform)));
 await p.close();
 
+// --- Career timeline: each year is a real button that lands the pinned story
+// on that stage, and the active stage follows it. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2000));
+await p.evaluate(() => document.getElementById('experience').scrollIntoView({ block: 'start' }));
+await new Promise((r) => setTimeout(r, 800));
+const clicked = await p.evaluate(() => {
+  const btn = [...document.querySelectorAll('#experience button[aria-label^="Go to "]')].find((b) => b.textContent?.trim() === '2019');
+  if (!btn) return false;
+  btn.click();
+  return true;
+});
+await new Promise((r) => setTimeout(r, 1800));
+const activeYear = await p.evaluate(() => document.querySelector('#experience button[aria-current="step"]')?.textContent?.trim() ?? '');
+check('Clicking 2019 on the career timeline lands on the 2019 stage', clicked && activeYear === '2019', `active: ${activeYear}`);
+await p.close();
+
 // --- Reflow: WCAG 1.4.10 requires content to reflow without horizontal
 // scrolling at 320 CSS px (the equivalent of 400% zoom on a 1280 screen). ---
 p = await b.newPage();
