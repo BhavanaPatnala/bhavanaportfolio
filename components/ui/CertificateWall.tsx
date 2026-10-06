@@ -58,7 +58,7 @@ export default function CertificateWall({ items }: { items: Certification[] }) {
                   disabled={viewIndex < 0}
                   data-cursor={viewIndex >= 0 ? 'view' : undefined}
                   aria-label={`View ${cert.title} certificate`}
-                  className="group relative block h-full w-full rounded-xl border border-glass-border bg-void-raised text-left shadow-[0_28px_60px_-28px_rgba(0,0,0,0.85)] transition-[transform,box-shadow] duration-500 ease-out motion-safe:hover:[transform:translateZ(22px)] motion-safe:focus-visible:[transform:translateZ(22px)] hover:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] focus-visible:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] disabled:cursor-default disabled:hover:[transform:none]"
+                  className="group relative block h-full w-full rounded-xl border border-glass-border bg-void-raised text-left shadow-[0_28px_60px_-28px_rgba(0,0,0,0.85)] transition-[transform,box-shadow] duration-slow ease-out motion-safe:hover:[transform:translateZ(22px)] motion-safe:focus-visible:[transform:translateZ(22px)] hover:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] focus-visible:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] disabled:cursor-default disabled:hover:[transform:none]"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl border-b border-glass-border bg-void-sunken">
                     {cert.image ? (
@@ -67,7 +67,7 @@ export default function CertificateWall({ items }: { items: Certification[] }) {
                         alt=""
                         fill
                         sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 30vw"
-                        className="object-cover object-top transition-transform duration-[900ms] ease-out motion-safe:group-hover:scale-[1.02]"
+                        className="object-cover object-top transition-transform duration-cinematic ease-out motion-safe:group-hover:scale-[1.02]"
                       />
                     ) : (
                       <span className="label absolute bottom-4 left-4 text-bone-4">Document to be added</span>

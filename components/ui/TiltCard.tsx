@@ -52,7 +52,7 @@ export default function TiltCard({ children, className }: { children: ReactNode;
       ref={ref}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
-      className={cn('relative transition-transform duration-300 ease-out will-change-transform', className)}
+      className={cn('relative transition-transform duration-normal ease-out will-change-transform', className)}
       style={{ transformStyle: 'preserve-3d' }}
     >
       {children}

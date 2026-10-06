@@ -869,3 +869,53 @@ Verified: the centred card computes to `scale ≈ 1`, the edge cards to
 Lightbox still opens from a carousel photo; zero horizontal overflow at 1440
 or 390. 60/60 interaction checks, 0/5 accessibility violations, zero lint
 errors and warnings, clean typecheck and QA build.
+
+## Motion tokens and performance budgets
+
+**Motion scale.** Four durations, matching the brief's motion tiers, live in
+`app/globals.css` and are exposed as Tailwind classes: `duration-fast` (200ms,
+micro feedback), `duration-normal` (300ms, UI and spatial hover),
+`duration-slow` (500ms, section reveals) and `duration-cinematic` (900ms, major
+transitions only). The values are the ones the site already used, so nothing
+moved visually. `TiltCard` and `CertificateWall` now use the scale. Three
+easing tokens (`ease-standard`, `ease-spatial`, `ease-emphasized`) are defined
+but not yet adopted: switching existing components to them changes how motion
+feels, so that is a separate decision. The brief's other motion tiers are not
+yet on the scale.
+
+**Performance budgets.** These are targets against figures measured on this
+build, not claims. The Lighthouse performance score is not budgeted, because
+it swings 43–63 on this machine under throttling.
+
+| Budget | Target | Measured on this build |
+|---|---|---|
+| Home first-load JS (shared + route) | ≤ 130 kB | 123 kB |
+| Case-study first-load JS | ≤ 120 kB | 114–115 kB |
+| 3D chunk | loads only near its scene | deferred by readiness and proximity |
+| Web fonts | 2 files | 2 files (Geist sans and mono) |
+| Cumulative Layout Shift | ≤ 0.05 | 0.012 across three runs |
+| Total Blocking Time | trend down on a clean machine | 1.2–4.2 s under throttling, not yet budgeted |
+
+Largest transferred assets, in order: the 3D chunk (about 100 kB), a second
+3D-related chunk (about 88 kB), the shared client chunk (about 54 kB), the
+application chunk (about 51 kB), then the two font files (about 50 kB and 45 kB).
+
+The budgets are checked by hand against each build's output and Lighthouse
+run. They are not yet enforced in CI.
+
+**Deliberately not built from this brief**, each with a reason:
+
+- **A PerfOS repository topology.** Without real module data it would be
+  decoration implying analysis the product does not show. The brief itself says
+  to remove effects that exist only to look impressive.
+- **Frame-time-driven DPR.** The control loop cannot be validated here. The
+  headless renderer uses software GL, so its frame times say nothing about a
+  real device. I won't ship a controller I can't measure.
+- **A liquid-glass signature shader.** It is subjective, adds GPU cost on every
+  transition, and needs design review before it earns a place.
+- **A rewritten closing headline.** The brief's "Let's build something
+  intelligent" would replace the Contact copy you have already accepted. The
+  footer line already carries the tagline.
+
+60/60 interaction checks, 0/5 accessibility violations, zero lint errors and
+warnings, clean typecheck and QA build.

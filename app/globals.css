@@ -7,6 +7,13 @@
     --gutter: 1.25rem;
     --nav-h: 64px;
     --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spatial: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+    --motion-fast: 200ms;
+    --motion-normal: 300ms;
+    --motion-slow: 500ms;
+    --motion-cinematic: 900ms;
   }
 
   @media (min-width: 768px) {

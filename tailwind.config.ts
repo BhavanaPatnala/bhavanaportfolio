@@ -70,9 +70,22 @@ const config: Config = {
         gutter: 'var(--gutter)',
         section: 'clamp(6rem, 13vh, 10rem)',
       },
+      // Motion scale. Four tiers, matching the brief's motion grammar: fast
+      // for micro feedback, normal for UI and spatial hover, slow for section
+      // reveals, cinematic only for major transitions. Values live in
+      // globals.css so JS and CSS read the same numbers.
+      transitionDuration: {
+        fast: 'var(--motion-fast)',
+        normal: 'var(--motion-normal)',
+        slow: 'var(--motion-slow)',
+        cinematic: 'var(--motion-cinematic)',
+      },
       transitionTimingFunction: {
         out: 'cubic-bezier(0.22, 1, 0.36, 1)',
         cinematic: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        standard: 'var(--ease-standard)',
+        spatial: 'var(--ease-spatial)',
+        emphasized: 'var(--ease-emphasized)',
       },
     },
   },
