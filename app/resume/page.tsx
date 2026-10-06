@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import PrintButton from '@/components/ui/PrintButton';
 import { education, roles } from '@/data/experience';
 import { certifications } from '@/data/certifications';
 import { awards } from '@/data/awards';
@@ -53,7 +52,6 @@ export default function ResumePage() {
                 ↓
               </span>
             </a>
-            <PrintButton />
             <Link
               href="/#work"
               data-cursor="link"

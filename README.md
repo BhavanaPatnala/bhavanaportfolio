@@ -964,3 +964,14 @@ The header navigation labels no longer carry section numbers.
 
 63/63 interaction checks, 0 accessibility violations, zero lint errors and
 warnings, clean typecheck and build.
+
+## Cursor label and résumé controls
+
+The custom cursor's project label reads "View", matching the brief's VIEW
+and OPEN. The longer "View project" wrapped and spilled out of the 64px
+circle. A check now confirms the label is "View" and fits. The résumé page
+keeps only the Download PDF control; the Print control was removed, along
+with its now-unused component.
+
+64/64 interaction checks, 0 accessibility violations, zero lint errors and
+warnings, clean typecheck and build.

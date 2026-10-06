@@ -285,6 +285,28 @@ check(
   `${pdfRes.status} ${pdfRes.headers.get('content-type')}`,
 );
 
+// --- Custom cursor: hovering a project shows the brief's "View" label, and the
+// label fits inside the circle rather than spilling out of it. ---
+p = await b.newPage();
+await p.setViewport({ width: 1440, height: 900 });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await new Promise((r) => setTimeout(r, 2000));
+await p.evaluate(() => document.querySelector('a[data-cursor="view"]').scrollIntoView({ block: 'center' }));
+await new Promise((r) => setTimeout(r, 1000));
+const cardBox = await p.evaluate(() => {
+  const r = document.querySelector('a[data-cursor="view"]').getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+});
+await p.mouse.move(cardBox.x, cardBox.y, { steps: 6 });
+await new Promise((r) => setTimeout(r, 700));
+const cursorLabel = await p.evaluate(() => {
+  const label = [...document.querySelectorAll('div[aria-hidden].fixed')].find((el) => el.className.includes('z-[90]'))?.firstElementChild;
+  if (!label) return null;
+  return { text: label.textContent?.trim() ?? '', fits: label.scrollWidth <= label.clientWidth + 1 && label.scrollHeight <= label.clientHeight + 1 };
+});
+check('Hovering a project shows a "View" cursor label that fits its circle', cursorLabel?.text === 'View' && cursorLabel.fits, JSON.stringify(cursorLabel));
+await p.close();
+
 // --- Reflow: WCAG 1.4.10 requires content to reflow without horizontal
 // scrolling at 320 CSS px (the equivalent of 400% zoom on a 1280 screen). ---
 p = await b.newPage();

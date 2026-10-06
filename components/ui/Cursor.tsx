@@ -7,7 +7,7 @@ type Mode = 'idle' | 'link' | 'view' | 'open' | 'explore';
 const LABELS: Record<Mode, string> = {
   idle: '',
   link: '',
-  view: 'View project',
+  view: 'View',
   open: 'Open',
   explore: 'Explore',
 };
